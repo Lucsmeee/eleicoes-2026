@@ -12,8 +12,9 @@ Os CSVs para o Power BI ficam no mesmo endereço, por exemplo
 
 | Quando | Horário de Brasília | Por quê |
 |---|---|---|
-| Todo dia | 07h00 | Pega o que saiu de madrugada e deixa a versão fresca para quem abre de manhã |
-| Todo dia | 22h00 | Pega as pesquisas divulgadas à noite (as grandes costumam sair no início da noite) |
+| Todo dia | 08h00 | Depois dos primeiros noticiários da manhã |
+| Todo dia | 13h00 | Notícias e pesquisas divulgadas pela manhã |
+| Todo dia | 20h00 | Pesquisas da tarde e do início da noite |
 | 4/10 e 25/10 | a cada 15 min, 17h–23h45 | Apuração oficial do TSE |
 | Quando você edita o snapshot | na hora | Publica as pesquisas novas que você digitou |
 
