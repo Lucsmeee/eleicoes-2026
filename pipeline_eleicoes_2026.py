@@ -64,10 +64,12 @@ UFS = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "
 # ===========================================================================
 # SNAPSHOT MANUAL – atualize estes blocos quando saírem pesquisas novas
 # ===========================================================================
-DATA_SNAPSHOT = "29/09/2026"
+DATA_SNAPSHOT = "30/09/2026"
 
 SEED_NACIONAL = [
     # instituto, data_fim, lula, flavio, margem, base  (AtlasIntel em votos válidos)
+    ("Indexa",              "2026-09-29", 39.0, 34.0, 2.2,  "total"),
+    ("Ideia",               "2026-09-28", 39.4, 38.4, 2.2,  "total"),
     ("Vox Brasil",          "2026-09-28", 41.1, 37.8, 2.15, "total"),
     ("AtlasIntel",          "2026-09-28", 46.2, 43.1, 1.0,  "validos"),
     ("Quaest",              "2026-09-27", 39.0, 34.0, 2.0,  "total"),
@@ -151,6 +153,8 @@ COMPARECIMENTO = 0.794            # premissa: comparecimento nacional do 2º tur
 
 # Simulações nacionais de 2º turno (instituto, data_fim, lula, flavio, margem)
 SEED_2T_NACIONAL = [
+    ("Indexa", "2026-09-29", 43.0, 42.0, 2.2),
+    ("Ideia", "2026-09-28", 48.5, 48.0, 2.2),
     ("Vox Brasil", "2026-09-28", 44.7, 45.2, 2.15),
     ("AtlasIntel", "2026-09-28", 50.0, 50.0, 1.0),   # votos válidos
     ("Quaest", "2026-09-27", 42.0, 42.0, 2.0),
@@ -168,13 +172,21 @@ SEED_DF = [
     ("Presidente", "2º turno", "Datafolha", "Lula", "Esquerda", 41),
     ("Presidente", "2º turno", "Quaest", "Flávio Bolsonaro", "Direita", 49),
     ("Presidente", "2º turno", "Quaest", "Lula", "Esquerda", 38),
-    ("Governador", "1º turno", "Datafolha", "Celina Leão", "Direita", 37),
-    ("Governador", "1º turno", "Datafolha", "Leandro Grass", "Esquerda", 21),
-    ("Governador", "1º turno", "Datafolha", "José Roberto Arruda", "Centro-direita", 18),
+    ("Governador", "1º turno", "Datafolha", "Celina Leão", "Direita", 42),
+    ("Governador", "1º turno", "Datafolha", "Leandro Grass", "Esquerda", 23),
+    ("Governador", "1º turno", "Quaest", "Celina Leão", "Direita", 39),
+    ("Governador", "1º turno", "Quaest", "Leandro Grass", "Esquerda", 23),
+    ("Governador", "1º turno", "Quaest", "Paula Belmonte", "Centro-direita", 9),
+    ("Governador", "2º turno", "Quaest", "Celina Leão", "Direita", 54),
+    ("Governador", "2º turno", "Quaest", "Leandro Grass", "Esquerda", 31),
     ("Senado", "1º turno", "Datafolha", "Michelle Bolsonaro", "Direita", 22),
     ("Senado", "1º turno", "Datafolha", "Leila do Vôlei", "Centro-esquerda", 19),
     ("Senado", "1º turno", "Datafolha", "Bia Kicis", "Direita", 15),
     ("Senado", "1º turno", "Datafolha", "Erika Kokay", "Esquerda", 15),
+    ("Senado", "1º turno", "Quaest", "Michelle Bolsonaro", "Direita", 26),
+    ("Senado", "1º turno", "Quaest", "Leila do Vôlei", "Centro-esquerda", 20),
+    ("Senado", "1º turno", "Quaest", "Bia Kicis", "Direita", 18),
+    ("Senado", "1º turno", "Quaest", "Erika Kokay", "Esquerda", 16),
 ]
 
 # Fonte do 1º turno por UF (padrão: Quaest 19-23/9)
@@ -209,40 +221,41 @@ DF_PAINEL = {
     "gov": {"fonte": "Real Time Big Data 24–28/9",
             "itens": [["Celina Leão", 47, "F"], ["Leandro Grass", 26, "L"], ["Paula Belmonte", 10, "N"], ["Cappelli", 4, "L"]],
             "nota": "Em votos válidos, Celina tem 52% e venceria no 1º turno; no 2º, 62% × 38% contra Grass. "
+                    "Quaest (25–28/9): Celina 39% × Grass 23% no 1º turno e 54% × 31% no 2º. "
                     "O TSE barrou a candidatura de Arruda em 23/9."},
     "sen": {"fonte": "Real Time Big Data 24–28/9",
             "itens": [["Michelle", 27, "F"], ["Bia Kicis", 18, "F"], ["Leila", 18, "L"], ["Erika Kokay", 16, "L"],
                       ["Sebastião Coelho", 11, "N"]],
-            "nota": "Michelle lidera; a segunda vaga tem empate técnico entre Bia Kicis, Leila e Kokay."},
+            "nota": "Michelle lidera; a segunda vaga tem empate técnico entre Bia Kicis, Leila e Kokay. "
+                    "Quaest (25–28/9): Michelle 26%, Leila 20%, Bia Kicis 18%, Kokay 16%."},
 }
 
 # Notícias do dia (usado quando não há ANTHROPIC_API_KEY). impacto: positivo | negativo | misto | neutro
-NOTICIAS_DATA = "2026-09-29"
+NOTICIAS_DATA = "2026-09-30"
 NOTICIAS_SNAPSHOT = [
-    {"titulo": "Fux derruba decisão de Dino e redes devem excluir fake news sobre padroeira", "fonte": "Poder360",
-     "url": "https://www.poder360.com.br/poder-justica/fux-derruba-decisao-de-dino-e-redes-devem-tirar-do-ar-fake-news/",
+    {"titulo": "Pablo Marçal anuncia apoio a Flávio e aliados especulam cargo ministerial", "fonte": "CNN Brasil",
+     "url": "https://www.cnnbrasil.com.br/eleicoes/pablo-marcal-anuncia-apoio-a-flavio-e-aliados-especulam-cargo-ministerial/",
      "candidato": "Flávio", "impacto": "positivo",
-     "motivo": "Vitória judicial: voltam a ser removidos os posts que lhe atribuíam o plano de tirar o título da padroeira. "
-               "Ressalva: decisão provisória até o plenário do STF."},
-    {"titulo": "Lula pede votos para Delúbio Soares, condenado no mensalão e na Lava Jato", "fonte": "CNN Brasil",
-     "url": "https://www.cnnbrasil.com.br/eleicoes/lula-pede-votos-para-delubio-soares-condenado-no-mensalao-e-na-lava-jato/",
+     "motivo": "Soma um nome com alcance nas redes a quatro dias da eleição. Ressalva: Marçal divide a direita e o "
+               "efeito sobre o voto de quem ainda não decidiu é incerto."},
+    {"titulo": "Lula lidera em 1º turno e empata com Flávio no 2º, aponta Indexa/Broadcast", "fonte": "CartaCapital",
+     "url": "https://www.cartacapital.com.br/politica/lula-lidera-em-1o-turno-e-empata-com-flavio-bolsonaro-no-2o-aponta-pesquisa-indexa-broadcast/",
+     "candidato": "Lula", "impacto": "positivo",
+     "motivo": "Cinco pontos à frente no 1º turno (39% × 34%). Ressalva: no 2º turno a diferença é de 1 ponto, "
+               "empate técnico."},
+    {"titulo": "Indexa/Broadcast: 51% desaprovam governo de Lula; aprovação é de 46%", "fonte": "CNN Brasil",
+     "url": "https://www.cnnbrasil.com.br/politica/indexa-broadcast-51-desaprovam-governo-de-lula-aprovacao-e-de-46/",
      "candidato": "Lula", "impacto": "negativo",
-     "motivo": "Reaviva o tema do mensalão na última semana. Ressalva: é apoio a candidato a deputado, com efeito "
-               "provavelmente limitado no voto presidencial."},
-    {"titulo": "Lula resiste a ir a debate da Globo e quer adiar confronto com Flávio para 2º turno", "fonte": "InfoMoney",
-     "url": "https://www.infomoney.com.br/politica/lula-resiste-a-ir-a-debate-da-globo-e-quer-adiar-confronto-com-flavio-para-2o-turno/",
-     "candidato": "Lula", "impacto": "misto",
-     "motivo": "Evita exposição na reta final, estratégia comum de quem está à frente. Ressalva: Flávio confirmou presença "
-               "e pode explorar a ausência; o PT condiciona a ida ao formato do debate de quinta (1/10)."},
-    {"titulo": "AtlasIntel: Flávio Bolsonaro tem 47,7% em segundo turno, e Lula soma 47,6%", "fonte": "Metrópoles",
-     "url": "https://www.metropoles.com/brasil/atlasintel-flavio-bolsonaro-tem-477-e-lula-476-em-segundo-turno",
+     "motivo": "Desaprovação acima da aprovação na reta final pesa contra a reeleição."},
+    {"titulo": "Meio/Ideia: Lula tem 48,5% no 2º turno; Flávio, 48%", "fonte": "CNN Brasil",
+     "url": "https://www.cnnbrasil.com.br/eleicoes/meio-ideia-lula-tem-485-no-2o-turno-flavio-48/",
      "candidato": "Flávio", "impacto": "misto",
-     "motivo": "Numericamente à frente no 2º turno, mas recuou 1,2 ponto no 1º turno e interrompeu a sequência de alta "
-               "desde agosto."},
+     "motivo": "Empate técnico nos dois turnos (39,4% × 38,4% no 1º), bom para quem vem de trás. Ressalva: Lula "
+               "segue numericamente à frente."},
 ]
 MODELO_CLAUDE = "claude-haiku-4-5-20251001"
 
-RODAPE = ("Fontes: Datafolha, Quaest, AtlasIntel, Nexus/BTG, Real Time Big Data, Correio Braziliense/Opinião, "
+RODAPE = ("Fontes: Datafolha, Quaest, AtlasIntel, Nexus/BTG, Real Time Big Data, Indexa/Broadcast, Meio/Ideia, Correio Braziliense/Opinião, "
           "InfoMoney, Poder360, TSE e TREs. Classificação esquerda/direita simplificada pelo alinhamento com Lula ou "
           "Flávio. Pesquisas são retratos do momento, não previsões.")
 
@@ -527,7 +540,7 @@ def tratar(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["instituto"] = (df["instituto"].astype(str).str.replace(r"\[.*?\]", "", regex=True)
                        .str.split("/").str[0].str.strip())
-    df["instituto"] = df["instituto"].replace({"Real Time": "Real Time Big Data", "Genial": "Quaest"})
+    df["instituto"] = df["instituto"].replace({"Real Time": "Real Time Big Data", "Genial": "Quaest", "Meio": "Ideia"})
     df["data_fim"] = df["data_fim"].map(_data)
     for col in ["lula", "flavio", "margem"]:
         df[col] = df[col].map(_pct)
