@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Eleições 2026 – reta final</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F4; --panel:#FFFFFF; --ink:#16222E; --muted:#5B6875; --line:#D5DCE3;
+  --lula:#B3261E; --flavio:#1D4E89; --empate:#B8860B; --neutro:#8A96A3; --vazio:#E3E8ED;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121A22; --panel:#1A242E; --ink:#E6ECF1; --muted:#9AA7B4; --line:#2C3946;
+    --lula:#E0605A; --flavio:#6FA3E0; --empate:#D9A93A; --neutro:#6D7A87; --vazio:#24303B;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121A22; --panel:#1A242E; --ink:#E6ECF1; --muted:#9AA7B4; --line:#2C3946;
+  --lula:#E0605A; --flavio:#6FA3E0; --empate:#D9A93A; --neutro:#6D7A87; --vazio:#24303B;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Barlow",system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 20px 56px}
+h1,h2,h3,.num{font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;font-weight:600;letter-spacing:.005em}
+h1{font-size:clamp(2.2rem,6vw,3.6rem);line-height:1;margin:0 0 6px}
+h2{font-size:1.9rem;line-height:1.1;margin:0 0 4px}
+h3{font-size:1.25rem;margin:0 0 10px}
+p{margin:0 0 12px;max-width:68ch}
+.sub{color:var(--muted)}
+section{margin-top:48px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.lula{color:var(--lula)} .flavio{color:var(--flavio)}
+
+/* HERO: cabo de guerra */
+.cabo{margin:26px 0 10px}
+.cabo-nums{display:flex;justify-content:space-between;align-items:flex-end}
+.cabo-nums .num{font-size:clamp(3rem,11vw,5.6rem);line-height:.9}
+.cabo-nums small{display:block;font:500 .95rem "Barlow",sans-serif;color:var(--muted)}
+.barra{position:relative;height:22px;border-radius:11px;overflow:hidden;display:flex;margin-top:10px;background:var(--vazio)}
+.barra i{display:block;height:100%}
+.meio{position:absolute;left:50%;top:-6px;bottom:-6px;width:2px;background:var(--ink);opacity:.55}
+.nota{font-size:.9rem;color:var(--muted);margin-top:8px}
+.pesq{margin-top:22px;display:grid;gap:10px}
+.linha{display:grid;grid-template-columns:150px 1fr 90px;align-items:center;gap:12px;font-size:.95rem}
+.trilho{position:relative;height:18px}
+.trilho::before{content:"";position:absolute;left:0;right:0;top:8px;height:2px;background:var(--line)}
+.dot{position:absolute;top:3px;width:12px;height:12px;border-radius:50%;transform:translateX(-50%)}
+.seg{position:absolute;top:8px;height:2px;background:var(--muted);opacity:.6}
+.linha .dif{text-align:right;font-weight:600}
+.escala{display:grid;grid-template-columns:150px 1fr 90px;gap:12px;font-size:.78rem;color:var(--muted)}
+.escala div{display:flex;justify-content:space-between}
+
+/* MAPA */
+.abas{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 18px}
+.abas button{font:600 .95rem "Barlow",sans-serif;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.abas button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible{outline:3px solid var(--empate);outline-offset:2px}
+.mapa-area{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:start}
+.grade{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;max-width:460px}
+.uf{aspect-ratio:1;border-radius:8px;border:0;display:flex;align-items:center;justify-content:center;font:700 clamp(.8rem,2.6vw,1.05rem) "Barlow Condensed",sans-serif;color:#fff;cursor:pointer;transition:transform .15s}
+.uf:hover{transform:scale(1.06)}
+.uf.sel{outline:3px solid var(--ink);outline-offset:1px}
+.uf.claro{color:var(--ink)}
+.legenda{display:flex;flex-wrap:wrap;gap:12px;font-size:.9rem;margin-top:14px}
+.legenda span{display:inline-flex;align-items:center;gap:6px}
+.legenda b{width:14px;height:14px;border-radius:4px;display:inline-block}
+.placar{display:flex;gap:10px;margin-bottom:14px}
+.placar div{flex:1;border-radius:10px;padding:10px 12px;border:1px solid var(--line)}
+.placar .num{font-size:2.2rem;line-height:1}
+.placar small{color:var(--muted);font-size:.85rem}
+.detalhe{min-height:120px}
+.detalhe .num{font-size:2.4rem;line-height:1}
+
+/* DF */
+.df-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.bar-row{display:grid;grid-template-columns:130px 1fr 44px;gap:10px;align-items:center;margin:7px 0;font-size:.95rem}
+.bar-bg{height:14px;background:var(--vazio);border-radius:7px;overflow:hidden}
+.bar-bg i{display:block;height:100%;border-radius:7px}
+.bar-row .v{text-align:right;font-weight:600}
+.tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-left:6px}
+.duelo{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding:9px 0;font-size:.95rem}
+.duelo:first-of-type{border-top:0}
+
+/* PIPELINE */
+.etapas{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;counter-reset:e}
+.etapa{position:relative;padding:16px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.etapa .n{font:700 2rem/1 "Barlow Condensed",sans-serif;color:var(--muted)}
+.etapa h3{margin:6px 0}
+.etapa p{font-size:.92rem;margin:0}
+.etapa code{font-size:.82rem;background:var(--vazio);padding:1px 5px;border-radius:4px}
+.rk{display:grid;grid-template-columns:34px 1fr 1fr 78px;align-items:center;gap:6px;font-size:.9rem;margin:3px 0}
+.rk .a{display:flex;justify-content:flex-end}.rk i{display:block;height:12px;border-radius:3px}
+.rk .v{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.rk.df{background:var(--vazio);border-radius:6px}
+.voltar{font:600 .9rem "Barlow",sans-serif;background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:5px 12px;margin-bottom:10px;cursor:pointer}
+.reg{margin:14px 0}.reg .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.reg .pilha{display:flex;height:22px;border-radius:6px;overflow:hidden;margin-top:6px;background:var(--vazio)}
+.reg .pilha i{display:block;height:100%}
+.reg small{color:var(--muted)}
+.campos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grupo{margin:10px 0 4px;font-weight:600;font-size:.95rem}
+.cand{display:flex;justify-content:space-between;gap:8px;font-size:.92rem;padding:5px 0;border-top:1px solid var(--line)}
+.cand span:first-child b{font-family:"Barlow Condensed",sans-serif;margin-right:6px}
+@media (max-width:760px){.campos{grid-template-columns:minmax(0,1fr)}}
+.banner{border:2px solid var(--ink);border-radius:14px;padding:18px 20px;margin:18px 0 0}
+.fontes div{display:flex;justify-content:space-between;gap:10px;font-size:.9rem;padding:6px 0;border-top:1px solid var(--line)}
+.ok{color:#2E7D4F}.falhou{color:var(--empate)}
+.news{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.nw{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.nw .tp{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.chip{font:600 .8rem "Barlow",sans-serif;padding:2px 9px;border-radius:999px;color:#fff}
+.imp{font:600 .85rem "Barlow",sans-serif;display:inline-flex;align-items:center;gap:5px}
+.imp.positivo{color:#2E7D4F}.imp.negativo{color:#B45309}.imp.misto{color:var(--empate)}.imp.neutro,.imp.sem{color:var(--muted)}
+.nw a{color:var(--ink);font-weight:600;line-height:1.3;text-decoration:none}.nw a:hover{text-decoration:underline}
+.nw p{font-size:.9rem;color:var(--muted);margin:0}
+@media (max-width:760px){.news{grid-template-columns:minmax(0,1fr)}}
+footer{margin-top:48px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+footer p{max-width:none}
+
+@media (max-width:760px){
+  .mapa-area,.df-grid{grid-template-columns:minmax(0,1fr)}
+  .etapas{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .linha,.escala{grid-template-columns:96px 1fr 60px}
+  .bar-row{grid-template-columns:110px 1fr 40px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+<header>
+  <p class="sub" id="contagem"></p>
+  <h1>Reta final das eleições 2026</h1>
+  <div id="apuracao"></div>
+  <p class="sub">Média das pesquisas nacionais para presidente mais recentes, uma por instituto, votos totais.</p>
+  <div class="cabo" id="cabo"></div>
+  <div class="panel">
+    <h3>Cada pesquisa</h3>
+    <div class="pesq" id="pesq"></div>
+    <div class="escala" style="margin-top:6px"><span></span><div><span>30%</span><span>40%</span><span>50%</span></div><span></span></div>
+    <p class="nota" id="nota-pesq"></p>
+  </div>
+  <div class="panel" style="margin-top:14px">
+    <h3>Cenário de 2º turno, Lula × Flávio</h3>
+    <div id="seg2t"></div>
+  </div>
+</header>
+
+<section aria-labelledby="t-news">
+  <h2 id="t-news">Notícias do dia</h2>
+  <p class="sub" id="sub-news"></p>
+  <div class="news" id="news"></div>
+  <p class="nota">O impacto é uma avaliação do efeito provável na campanha, com o mesmo critério para os dois candidatos, e não um juízo sobre o mérito da notícia.</p>
+</section>
+
+<section aria-labelledby="t-mapa">
+  <h2 id="t-mapa">Onde cada lado vence</h2>
+  <p class="sub">Toque em um estado para ver os números dele; toque de novo ou use "Ver Brasil inteiro" para voltar ao panorama.</p>
+  <div class="abas" role="group" aria-label="Escolha o recorte" id="abas"></div>
+  <div class="mapa-area">
+    <div>
+      <div class="grade" id="grade"></div>
+      <div class="legenda" id="legenda"></div>
+    </div>
+    <div>
+      <div class="placar" id="placar"></div>
+      <div class="panel detalhe" id="detalhe"></div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="t-saldo">
+  <h2 id="t-saldo">Onde estão os votos</h2>
+  <p class="sub" id="sub-saldo"></p>
+  <div class="panel"><div id="ranking"></div><p class="nota" id="nota-saldo"></p></div>
+</section>
+
+<section aria-labelledby="t-reg">
+  <h2 id="t-reg">Votos por região</h2>
+  <p class="sub" id="sub-reg"></p>
+  <div class="panel" id="regioes"></div>
+</section>
+
+<section aria-labelledby="t-eleitos">
+  <h2 id="t-eleitos">Quem deve ser eleito</h2>
+  <p class="sub">Candidatos a governador alinhados a cada lado e a situação de cada um nas pesquisas. Favorito = mais de 6 pontos à frente do segundo colocado.</p>
+  <div class="campos">
+    <div class="panel"><h3 class="lula">Aliados de Lula</h3><div id="gov-L"></div></div>
+    <div class="panel"><h3 class="flavio">Aliados de Flávio</h3><div id="gov-F"></div></div>
+  </div>
+  <div class="panel" style="margin-top:16px"><h3>Líderes fora das duas alianças</h3><div id="gov-N"></div></div>
+  <div class="panel" style="margin-top:16px"><h3>Senado, 54 vagas em disputa</h3><div id="senado"></div></div>
+</section>
+
+<section aria-labelledby="t-df">
+  <h2 id="t-df">Distrito Federal</h2>
+  <p class="sub">O DF pende para a direita nos três cargos majoritários. A disputa mais aberta é a segunda vaga do Senado.</p>
+  <div class="df-grid">
+    <div class="panel">
+      <h3>Presidente, 1º turno <span class="tag" id="df-pres-fonte"></span></h3>
+      <div id="df-pres"></div>
+      <h3 style="margin-top:18px">Cenários de 2º turno</h3>
+      <div id="df-2t"></div>
+      <p class="nota" id="df-rej"></p>
+    </div>
+    <div class="panel">
+      <h3>Governador, 1º turno <span class="tag" id="df-gov-fonte"></span></h3>
+      <div id="df-gov"></div>
+      <p class="nota" id="df-gov-nota"></p>
+      <h3 style="margin-top:18px">Senado, duas vagas <span class="tag" id="df-sen-fonte"></span></h3>
+      <div id="df-sen"></div>
+      <p class="nota" id="df-sen-nota"></p>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="t-pipe">
+  <h2 id="t-pipe">Como os dados chegam aqui</h2>
+  <p class="sub">Gerado pelo <code>pipeline_eleicoes_2026.py</code>. Cada fonte abaixo diz se veio automática nesta execução ou do snapshot manual.</p>
+  <div class="etapas">
+    <div class="etapa"><span class="n">1</span><h3>Extrair</h3><p>Tenta TSE (eleitorado e apuração) e Wikipédia (pesquisas nacionais). O que falhar ou não tiver fonte automática vem do snapshot manual.</p></div>
+    <div class="etapa"><span class="n">2</span><h3>Tratar</h3><p>Limpa institutos, datas e percentuais e junta tudo por UF.</p></div>
+    <div class="etapa"><span class="n">3</span><h3>Agregar</h3><p>Médias, empate técnico, saldo de votos, regiões e situação dos candidatos.</p></div>
+    <div class="etapa"><span class="n">4</span><h3>Publicar</h3><p>Grava os CSVs para o Power BI e este painel em HTML.</p></div>
+  </div>
+  <div class="panel fontes" style="margin-top:14px"><h3>Fontes nesta execução</h3><div id="fontes"></div></div>
+</section>
+
+<footer><p id="rodape"></p></footer>
+</main>
+
+<script>
+const D = /*__DADOS__*/null;
+const POS={RR:[2,0],AP:[4,0],AM:[1,1],PA:[3,1],MA:[4,1],CE:[5,1],RN:[6,1],AC:[0,2],RO:[1,2],MT:[2,2],TO:[3,2],PI:[4,2],PE:[5,2],PB:[6,2],MS:[2,3],GO:[3,3],DF:[4,3],BA:[5,3],AL:[6,3],PR:[2,4],SP:[3,4],MG:[4,4],ES:[5,4],SE:[6,4],SC:[2,5],RJ:[4,5],RS:[2,6]};
+const $=id=>document.getElementById(id);
+const fmt=v=>String(v).replace(".",",");
+const milhoes=v=>(Math.abs(v)/1e6).toFixed(2).replace(".",",")+" mi";
+const mi=v=>(v>0?"+":"−")+milhoes(v);
+const U=Object.fromEntries(D.ufs.map(u=>[u.uf,u]));
+const T={L:"Lula",F:"Flávio",E:"Empate técnico",B:"Bolsonaro","?":"sem pesquisa"};
+
+// Cabeçalho e apuração
+(function(){
+  const dias=Math.ceil((new Date(D.eleicao)-new Date())/864e5);
+  $("contagem").textContent=(dias>0?`Faltam ${dias} dias para o 1º turno, `:"")+`dados de ${D.atualizado}`;
+  const R=D.resultado;
+  if(R) $("apuracao").innerHTML=`<div class="banner"><h3>Apuração oficial do TSE, ${fmt(R.pst)}% das seções</h3>
+    <p><span class="num lula" style="font-size:2.6rem">${fmt(R.lula_pct)}%</span> &nbsp;×&nbsp; <span class="num flavio" style="font-size:2.6rem">${fmt(R.flavio_pct)}%</span><br>
+    <span class="sub">Lula × Flávio, votos válidos. ${milhoes(R.lula_votos)} × ${milhoes(R.flavio_votos)} votos.</span></p></div>`;
+  const m=D.media, dif=Math.round((m.lula-m.flavio)*10)/10;
+  $("cabo").setAttribute("aria-label",`Média nacional: Lula ${fmt(m.lula)}%, Flávio ${fmt(m.flavio)}%`);
+  $("cabo").innerHTML=`<div class="cabo-nums"><div class="lula"><span class="num">${fmt(m.lula)}%</span><small>Lula (PT)</small></div>
+    <div class="flavio" style="text-align:right"><span class="num">${fmt(m.flavio)}%</span><small>Flávio Bolsonaro (PL)</small></div></div>
+    <div class="barra"><i style="width:${m.lula}%;background:var(--lula)"></i><i style="flex:1"></i><i style="width:${m.flavio}%;background:var(--flavio)"></i><span class="meio"></span></div>
+    <p class="nota">Média de ${m.n} pesquisas dos últimos ${m.janela} dias. Diferença de ${fmt(Math.abs(dif))} pontos para ${dif>=0?"Lula":"Flávio"}, ${Math.abs(dif)<=4?"dentro da margem somada: empate técnico":"fora da margem de erro"}. O restante são outros candidatos, brancos, nulos e indecisos.</p>`;
+  const x=v=>Math.max(0,Math.min(100,(v-30)/20*100));
+  $("pesq").innerHTML=D.pesquisas.map(p=>{const lo=Math.min(p.l,p.f),hi=Math.max(p.l,p.f),d=p.l-p.f;
+    return `<div class="linha"><span>${p.i}${p.base==="validos"?"*":""}<br><span class="sub" style="font-size:.8rem">${p.d}</span></span>
+    <div class="trilho" aria-label="Lula ${p.l}%, Flávio ${p.f}%"><span class="seg" style="left:${x(lo)}%;width:${x(hi)-x(lo)}%"></span>
+    <span class="dot" style="left:${x(p.f)}%;background:var(--flavio)"></span><span class="dot" style="left:${x(p.l)}%;background:var(--lula)"></span></div>
+    <span class="dif ${d>=0?"lula":"flavio"}">${d>=0?"Lula":"Flávio"} +${fmt(Math.abs(Math.round(d*10)/10))}</span></div>`}).join("");
+  $("nota-pesq").textContent=D.pesquisas.some(p=>p.base==="validos")?"* Votos válidos (excluem brancos e nulos), por isso os números são mais altos; ficam fora da média.":"";
+  $("seg2t").innerHTML=D.seg2t.map(p=>`<div class="duelo"><span>${p.i} <span class="sub">${p.d}${p.base==="validos"?", válidos":""}</span></span><span><b class="lula">${fmt(p.l)}%</b> × <b class="flavio">${fmt(p.f)}%</b></span></div>`).join("");
+})();
+
+// Notícias
+(function(){
+  const N=D.noticias||[];
+  $("sub-news").textContent=!N.length?"Sem notícias nesta execução.":(D.criterio_noticias==="sem classificação"?"As primeiras manchetes de cada candidato no Google Notícias, ainda sem classificação.":`As ${N.length} mais repercutidas sobre os candidatos. Classificação: ${D.criterio_noticias}.`);
+  const ic={positivo:"▲ Positivo",negativo:"▼ Negativo",misto:"◆ Misto",neutro:"● Neutro"};
+  const cor=c=>c==="Lula"?"var(--lula)":"var(--flavio)";
+  const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  $("news").innerHTML=N.map(n=>`<article class="nw"><div class="tp"><span class="chip" style="background:${cor(n.candidato)}">${esc(n.candidato)}</span>
+    <span class="imp ${ic[n.impacto]?n.impacto:"sem"}">${ic[n.impacto]||"Sem classificação"} para ${esc(n.candidato)}</span></div>
+    <a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.titulo)}</a>
+    ${n.motivo?`<p>${esc(n.motivo)}</p>`:""}<p style="font-size:.8rem">${esc(n.fonte)}</p></article>`).join("");
+})();
+
+// Mapa
+const MODOS={
+  p26:{rot:"1º turno 2026",v:u=>u.l26,cats:{L:["Lula lidera","var(--lula)"],F:["Flávio lidera","var(--flavio)"],E:["Empate técnico","var(--empate)"]}},
+  s26:{rot:"2º turno 2026 (pesquisas)",v:u=>u.lider2,cats:{L:["Lula lidera","var(--lula)"],F:["Flávio lidera","var(--flavio)"],E:["Empate técnico","var(--empate)"],"?":["Sem pesquisa de 2º turno","var(--vazio)"]}},
+  saldo:{rot:"Saldo de votos",cats:{L:["Saldo para Lula","var(--lula)"],F:["Saldo para Flávio","var(--flavio)"],"?":["Sem pesquisa com números","var(--vazio)"]}},
+  p22:{rot:"Resultado 2022",v:u=>u.v22,cats:{L:["Lula venceu","var(--lula)"],B:["Bolsonaro venceu","var(--flavio)"]}},
+  gov:{rot:"Governador 2026",v:u=>u.gov,cats:{L:["Aliado de Lula lidera","var(--lula)"],F:["Aliado de Flávio lidera","var(--flavio)"],E:["Empate técnico","var(--empate)"],N:["Fora das alianças","var(--neutro)"]}}
+};
+if(D.resultado&&D.resultado.por_uf) MODOS.apur={rot:"Apuração TSE",v:u=>{const r=D.resultado.por_uf[u.uf];return r?(r.lula_pct>r.flavio_pct?"L":"F"):"?"},cats:{L:["Lula à frente","var(--lula)"],F:["Flávio à frente","var(--flavio)"],"?":["Sem dado","var(--vazio)"]}};
+let modo=D.resultado?"apur":"p26",sel=null;
+$("abas").innerHTML=Object.entries(MODOS).map(([k,m])=>`<button data-modo="${k}">${m.rot}</button>`).join("");
+const maxSaldo=Math.max(...D.ufs.map(u=>Math.abs(u.saldo1||0)));
+function contar(m){const c={};D.ufs.forEach(u=>{const k=m.v(u);c[k]=(c[k]||0)+1});return c;}
+function render(){
+  const m=MODOS[modo],g=$("grade");g.innerHTML="";
+  D.ufs.forEach(u=>{
+    const b=document.createElement("button");let c,claro;
+    if(modo==="saldo"){const v=u.saldo1;
+      if(v==null){c=m.cats["?"];claro=true;}
+      else{const k=v>0?"L":"F",pct=Math.round(18+82*Math.sqrt(Math.abs(v)/maxSaldo));c=[m.cats[k][0],`color-mix(in srgb, ${m.cats[k][1]} ${pct}%, var(--vazio))`];claro=pct<50;}
+    }else{const k=m.v(u);c=m.cats[k]||m.cats["?"]||["",""];claro=k==="?";}
+    b.className="uf"+(u.uf===sel?" sel":"")+(claro?" claro":"");
+    b.style.gridColumn=POS[u.uf][0]+1;b.style.gridRow=POS[u.uf][1]+1;b.style.background=c[1];
+    b.textContent=u.uf;b.setAttribute("aria-label",`${u.uf}: ${c[0]}`);
+    b.onclick=()=>{if(sel===u.uf){voltar();return;}sel=u.uf;render();};
+    g.appendChild(b);
+  });
+  $("legenda").innerHTML=Object.values(m.cats).map(c=>`<span><b style="background:${c[1]}"></b>${c[0]}</span>`).join("");
+  if(modo==="saldo"){let l=0,f=0;D.ufs.forEach(u=>{if(u.saldo1>0)l+=u.saldo1;else if(u.saldo1<0)f-=u.saldo1;});
+    $("placar").innerHTML=`<div><span class="num lula">${milhoes(l)}</span><br><small>Saldo dos estados que pendem para Lula</small></div><div><span class="num flavio">${milhoes(f)}</span><br><small>Saldo dos estados que pendem para Flávio</small></div>`;
+  }else{const cont=contar(m);
+    $("placar").innerHTML=Object.entries(m.cats).filter(([k])=>k!=="?").map(([k,c])=>`<div><span class="num" style="color:${c[1]}">${cont[k]||0}</span><br><small>${c[0]}</small></div>`).join("");}
+  document.querySelectorAll("#abas button").forEach(b=>{b.setAttribute("aria-pressed",b.dataset.modo===modo);b.onclick=()=>{modo=b.dataset.modo;render();};});
+  sel?detalhe(U[sel]):geral();
+}
+function voltar(){sel=null;render();}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sel)voltar();});
+function geral(){
+  const m=MODOS[modo],c=modo==="saldo"?{}:contar(m);let h;
+  if(modo==="p26") h=`<h3>Brasil, 1º turno</h3><p><span class="num lula">${fmt(D.media.lula)}%</span> &nbsp;×&nbsp; <span class="num flavio">${fmt(D.media.flavio)}%</span><br><span class="sub">Lula × Flávio, média das pesquisas nacionais</span></p><p>Lula lidera em ${c.L||0} UFs, Flávio em ${c.F||0}, e ${c.E||0} estão em empate técnico.</p>`;
+  else if(modo==="s26"){const p=D.seg2t[0],com=D.ufs.filter(u=>u.lider2!=="?").map(u=>u.uf);
+    h=`<h3>Brasil, 2º turno</h3><p><span class="num lula">${fmt(p.l)}%</span> &nbsp;×&nbsp; <span class="num flavio">${fmt(p.f)}%</span><br><span class="sub">Lula × Flávio, ${p.i} ${p.d}</span></p><p>Pesquisa estadual de 2º turno disponível para: ${com.join(", ")||"nenhum estado"}.</p>`;}
+  else if(modo==="saldo"){const tot=D.ufs.reduce((a,u)=>a+(u.saldo1||0),0);const ne=D.reg.find(r=>r[0]==="Nordeste");const outros=D.reg.filter(r=>r[0]!=="Nordeste").reduce((a,r)=>a+(r[2]-r[3]),0);
+    h=`<h3>Brasil, saldo de votos</h3><p><span class="num ${tot>0?"lula":"flavio"}">${mi(tot)}</span><br><span class="sub">Saldo líquido estimado para ${tot>0?"Lula":"Flávio"}, somando os estados</span></p><p>O Nordeste rende ${mi(ne[2]-ne[3])} para ${ne[2]>ne[3]?"Lula":"Flávio"}; as outras quatro regiões juntas, ${mi(outros)} para ${outros>0?"Lula":"Flávio"}.</p>`;}
+  else if(modo==="p22") h=`<h3>Brasil, 2º turno de 2022</h3><p><span class="num lula">50,9%</span> &nbsp;×&nbsp; <span class="num flavio">49,1%</span><br><span class="sub">Lula × Bolsonaro, votos válidos</span></p><p>Lula venceu em ${c.L} UFs e Bolsonaro em ${c.B}, incluindo o DF.</p>`;
+  else if(modo==="gov"){const fav=k=>D.gov.filter(x=>x[3]===k&&x[5].startsWith("Favorito")).length;
+    h=`<h3>Brasil, governadores</h3><p>Aliados de Flávio lideram em ${c.F||0} UFs (${fav("F")} favoritos), aliados de Lula em ${c.L||0} (${fav("L")} favoritos), ${c.E||0} estão em empate técnico e ${c.N||0} têm líder fora das duas alianças.</p>`;}
+  else {const R=D.resultado;h=`<h3>Brasil, apuração</h3><p><span class="num lula">${fmt(R.lula_pct)}%</span> &nbsp;×&nbsp; <span class="num flavio">${fmt(R.flavio_pct)}%</span><br><span class="sub">${fmt(R.pst)}% das seções totalizadas</span></p>`;}
+  $("detalhe").innerHTML=h+`<p class="sub">Toque em um estado para ver os números dele.</p>`;
+}
+function detalhe(u){
+  const g={L:"aliado de Lula lidera",F:"aliado de Flávio lidera",E:"empate técnico",N:"líder fora das alianças"};
+  let h=`<button class="voltar" onclick="voltar()">← Ver Brasil inteiro</button><h3>${u.uf}</h3>`;
+  const r=D.resultado&&D.resultado.por_uf&&D.resultado.por_uf[u.uf];
+  if(r) h+=`<p><span class="num lula">${fmt(r.lula_pct)}%</span> &nbsp;×&nbsp; <span class="num flavio">${fmt(r.flavio_pct)}%</span><br><span class="sub">Apuração TSE, ${fmt(r.pst)}% das seções</span></p>`;
+  if(u.l1!=null) h+=`<p><span class="num lula">${u.l1}%</span> &nbsp;×&nbsp; <span class="num flavio">${u.f1}%</span><br><span class="sub">Lula × Flávio, 1º turno (${u.fonte1})</span></p>`;
+  if(u.l2!=null) h+=`<p><span class="num lula">${u.l2}%</span> &nbsp;×&nbsp; <span class="num flavio">${u.f2}%</span><br><span class="sub">Lula × Flávio, 2º turno${u.fonte2?` (${u.fonte2})`:""}</span></p>`;
+  h+=`<p>1º turno 2026: <b>${T[u.l26]}</b><br>2º turno 2026: <b>${T[u.lider2]}</b><br>Resultado 2022: <b>${T[u.v22]}</b><br>Governador: <b>${g[u.gov]}</b></p>`;
+  h+=`<p>Eleitorado: <b>${milhoes(u.eleit)}</b> (${fmt(u.peso)}% do país${u.fonte_eleit==="estimado"?", estimado":""})`;
+  if(u.saldo1!=null) h+=`<br>Saldo estimado no 1º turno: <b class="${u.saldo1>0?"lula":"flavio"}">${mi(u.saldo1)} ${u.saldo1>0?"Lula":"Flávio"}</b>`;
+  if(u.saldo2!=null) h+=`<br>Saldo estimado no 2º turno: <b class="${u.saldo2>0?"lula":u.saldo2<0?"flavio":""}">${u.saldo2===0?"zero (empate)":mi(u.saldo2)+(u.saldo2>0?" Lula":" Flávio")}</b>`;
+  h+=`</p>`;
+  if(u.nota) h+=`<p class="sub">${u.nota}</p>`;
+  const gv=D.gov.filter(x=>x[0]===u.uf);
+  if(gv.length) h+=`<p class="sub">Governador: ${gv.map(x=>`${x[1]} (${x[2]})${x[4]!=null?" "+x[4]+"%":""}`).join(", ")}</p>`;
+  $("detalhe").innerHTML=h;
+}
+render();
+
+// Saldo por estado
+(function(){
+  $("sub-saldo").textContent=`Saldo estimado de votos de cada estado no 1º turno: eleitorado × comparecimento de ${fmt(D.comparecimento*100)}% (2º turno de 2022) × diferença entre Lula e Flávio na pesquisa estadual.`;
+  const rk=D.ufs.filter(u=>u.saldo1!=null).sort((a,b)=>b.saldo1-a.saldo1);
+  $("ranking").innerHTML=rk.map(u=>{const w=Math.abs(u.saldo1)/maxSaldo*100;
+    return `<div class="rk${u.uf==="DF"?" df":""}"><b>${u.uf}</b><div class="a">${u.saldo1<0?`<i style="width:${w}%;background:var(--flavio)"></i>`:""}</div><div>${u.saldo1>0?`<i style="width:${w}%;background:var(--lula)"></i>`:""}</div><span class="v ${u.saldo1>0?"lula":"flavio"}">${mi(u.saldo1)}</span></div>`}).join("");
+  const tot=rk.reduce((a,u)=>a+u.saldo1,0),sem=D.ufs.filter(u=>u.saldo1==null).map(u=>u.uf),est=D.ufs.filter(u=>u.fonte_eleit==="estimado").length;
+  const top=rk[0],fl3=rk.slice(-3);
+  $("nota-saldo").textContent=`${top.uf} sozinho rende ${mi(top.saldo1)} a ${top.saldo1>0?"Lula":"Flávio"}; os três maiores saldos de Flávio (${fl3.map(u=>u.uf).join(", ")}) somam ${mi(fl3.reduce((a,u)=>a+u.saldo1,0))}. Somando os estados, o saldo líquido é ${mi(tot)} para ${tot>0?"Lula":"Flávio"}.`+(sem.length?` Sem números: ${sem.join(", ")}.`:"")+(est?` Eleitorado de ${est} estados é estimado.`:" Eleitorado oficial do TSE.");
+})();
+
+// Regiões
+(function(){
+  $("sub-reg").textContent=`Estimativa de votos absolutos no 1º turno: eleitorado × ${fmt(D.comparecimento*100)}% de comparecimento, dividido pelas pesquisas estaduais.`;
+  $("regioes").innerHTML=[...D.reg].sort((a,b)=>b[1]-a[1]).map(([n,v,l,f,s])=>{const o=v-l-f,sd=l-f;
+    return `<div class="reg"><div class="top"><b>${n}</b><small>${milhoes(v)} votantes estimados, saldo <b class="${sd>0?"lula":"flavio"}">${mi(sd)} ${sd>0?"Lula":"Flávio"}</b></small></div>
+    <div class="pilha" aria-label="${n}: Lula ${milhoes(l)}, Flávio ${milhoes(f)}"><i style="width:${l/v*100}%;background:var(--lula)"></i><i style="width:${f/v*100}%;background:var(--flavio)"></i></div>
+    <small><span class="lula">Lula ${milhoes(l)}</span>, <span class="flavio">Flávio ${milhoes(f)}</span>, outros/indecisos/brancos ${milhoes(o)}${s?` (inclui ${milhoes(s)} de estados sem pesquisa)`:""}</small></div>`}).join("");
+})();
+
+// Governadores e Senado
+(function(){
+  const rot={"Favorito":"Favoritos","Favorito (outros institutos)":"Favoritos","Empate técnico":"Em disputa (empate técnico)","Atrás":"Atrás nas pesquisas"};
+  function lista(campo){
+    const xs=D.gov.filter(x=>x[3]===campo&&(campo!=="N"||x[5].startsWith("Favorito")));const gr={};
+    xs.forEach(x=>{const k=rot[x[5]];(gr[k]=gr[k]||[]).push(x)});
+    return ["Favoritos","Em disputa (empate técnico)","Atrás nas pesquisas"].filter(k=>gr[k]).map(k=>(campo==="N"?"":`<div class="grupo">${k} (${gr[k].length})</div>`)+
+      gr[k].sort((a,b)=>(b[4]??99)-(a[4]??99)).map(x=>`<div class="cand"><span><b>${x[0]}</b>${x[1]} <span class="sub">${x[2]}</span></span><span>${x[4]!=null?x[4]+"%":"lidera"}</span></div>`).join("")).join("");
+  }
+  $("gov-L").innerHTML=lista("L");$("gov-F").innerHTML=lista("F")+(D.notas_gov.F?`<p class="nota">${D.notas_gov.F}</p>`:"");
+  $("gov-N").innerHTML=lista("N")+(D.notas_gov.N?`<p class="nota">${D.notas_gov.N}</p>`:"");
+  const S=D.senado;
+  $("senado").innerHTML=`<div class="duelo"><span>Oposição a Lula entre os 54 que lideram</span><b class="flavio">${S.oposicao}</b></div>
+    <div class="duelo"><span>Aliados de Lula entre os 54 que lideram</span><b class="lula">${S.aliados}</b></div>
+    <div class="duelo"><span>Flutuantes</span><b>${S.flutuantes}</b></div>
+    <div class="duelo"><span>Bancada de oposição em 2027, se as pesquisas se confirmarem</span><b class="flavio">${S.antes} → ${S.depois}</b></div>
+    <div class="duelo"><span>Senadores do PL / do PT a partir de 2027</span><b><span class="flavio">${S.pl}</span> / <span class="lula">${S.pt}</span></b></div>
+    <p class="nota">${S.fonte}</p>`;
+})();
+
+// DF
+(function(){
+  const cor={F:"var(--flavio)",L:"var(--lula)",N:"var(--neutro)"};
+  const barras=(id,its)=>$(id).innerHTML=its.map(([n,v,c])=>`<div class="bar-row"><span>${n}</span><div class="bar-bg"><i style="width:${v*1.6}%;background:${cor[c]}"></i></div><span class="v">${v}%</span></div>`).join("");
+  const F=D.df;
+  $("df-pres-fonte").textContent=F.pres1.fonte;barras("df-pres",F.pres1.itens);
+  $("df-2t").innerHTML=F.pres2.map(([i,f,l])=>`<div class="duelo"><span>${i}</span><span><b class="flavio">Flávio ${fmt(f)}%</b> × <b class="lula">Lula ${fmt(l)}%</b></span></div>`).join("");
+  $("df-rej").textContent=F.rejeicao;
+  $("df-gov-fonte").textContent=F.gov.fonte;barras("df-gov",F.gov.itens);$("df-gov-nota").textContent=F.gov.nota;
+  $("df-sen-fonte").textContent=F.sen.fonte;barras("df-sen",F.sen.itens);$("df-sen-nota").textContent=F.sen.nota;
+})();
+
+// Fontes
+$("fontes").innerHTML=D.fontes.map(f=>`<div><span>${f.nome}</span><span class="${f.ok?"ok":"falhou"}">${f.status}</span></div>`).join("");
+$("rodape").textContent=`Dados de ${D.atualizado}. `+D.rodape;
+</script>
+</body>
+</html>

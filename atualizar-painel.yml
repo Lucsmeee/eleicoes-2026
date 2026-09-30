@@ -1,0 +1,66 @@
+name: Atualizar painel das eleições
+
+on:
+  schedule:
+    # Horários em UTC (Brasília = UTC-3). O GitHub pode atrasar alguns minutos.
+    - cron: "0 10 * * *"            # 07h00 de Brasília: versão da manhã
+    - cron: "0 1 * * *"             # 22h00 de Brasília: depois das divulgações da noite
+    - cron: "*/15 20-23 4,25 10 *"  # dias de votação (4/10 e 25/10): a cada 15 min das 17h às 20h45
+    - cron: "*/15 0-2 5,26 10 *"    # ... e das 21h às 23h45
+  push:
+    branches: [main]
+    paths: ["pipeline_eleicoes_2026.py", "painel_template.html"]   # editou o snapshot? publica na hora
+  workflow_dispatch:                # botão "Run workflow" para rodar manualmente
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Rodar pipeline
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # opcional: classifica as notícias do dia
+        run: |
+          ARGS="--turno ${{ vars.TURNO || '1' }}"
+          if [ -n "${{ vars.CODIGO_ELEICAO }}" ]; then ARGS="$ARGS --codigo-eleicao ${{ vars.CODIGO_ELEICAO }}"; fi
+          python pipeline_eleicoes_2026.py $ARGS
+
+      - name: Montar site
+        run: |
+          mkdir -p site
+          cp saida/painel_eleicoes_2026.html site/index.html
+          cp saida/*.csv site/
+
+      - name: Guardar cache do eleitorado (evita baixar o arquivo grande do TSE toda vez)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add cache/ 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "Cache do eleitorado TSE" && git push)
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
