@@ -263,11 +263,11 @@ const T={L:"Lula",F:"Flávio",E:"Empate técnico",B:"Bolsonaro","?":"sem pesquis
     <p class="nota">Média de ${m.n} pesquisas dos últimos ${m.janela} dias. Diferença de ${fmt(Math.abs(dif))} pontos para ${dif>=0?"Lula":"Flávio"}, ${Math.abs(dif)<=4?"dentro da margem somada: empate técnico":"fora da margem de erro"}. O restante são outros candidatos, brancos, nulos e indecisos.</p>`;
   const x=v=>Math.max(0,Math.min(100,(v-30)/20*100));
   $("pesq").innerHTML=D.pesquisas.map(p=>{const lo=Math.min(p.l,p.f),hi=Math.max(p.l,p.f),d=p.l-p.f;
-    return `<div class="linha"><span>${p.i}${p.base==="validos"?"*":""}<br><span class="sub" style="font-size:.8rem">${p.d}</span></span>
+    return `<div class="linha"><span>${p.i}${p.base!=="total"?"*":""}<br><span class="sub" style="font-size:.8rem">${p.d}</span></span>
     <div class="trilho" aria-label="Lula ${p.l}%, Flávio ${p.f}%"><span class="seg" style="left:${x(lo)}%;width:${x(hi)-x(lo)}%"></span>
     <span class="dot" style="left:${x(p.f)}%;background:var(--flavio)"></span><span class="dot" style="left:${x(p.l)}%;background:var(--lula)"></span></div>
     <span class="dif ${d>=0?"lula":"flavio"}">${d>=0?"Lula":"Flávio"} +${fmt(Math.abs(Math.round(d*10)/10))}</span></div>`}).join("");
-  $("nota-pesq").textContent=D.pesquisas.some(p=>p.base==="validos")?"* Votos válidos (excluem brancos e nulos), por isso os números são mais altos; ficam fora da média.":"";
+  $("nota-pesq").textContent=D.pesquisas.some(p=>p.base!=="total")?"* Quase sem indecisos ou brancos (votos válidos ou método próprio do instituto), por isso os números são mais altos; ficam fora da média.":"";
   $("seg2t").innerHTML=D.seg2t.map(p=>`<div class="duelo"><span>${p.i} <span class="sub">${p.d}${p.base==="validos"?", válidos":""}</span></span><span><b class="lula">${fmt(p.l)}%</b> × <b class="flavio">${fmt(p.f)}%</b></span></div>`).join("");
 })();
 

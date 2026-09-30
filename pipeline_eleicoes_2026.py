@@ -275,17 +275,32 @@ def extrair_pesquisas(offline: bool) -> pd.DataFrame:
         html = _get(WIKI_URL, 30).text
         for tabela in pd.read_html(StringIO(html), flavor="lxml"):
             if isinstance(tabela.columns, pd.MultiIndex):
-                tabela.columns = [" ".join(map(str, c)).strip() for c in tabela.columns]
+                # junta os níveis do cabeçalho ignorando os "Unnamed" e repetições
+                nomes = []
+                for col in tabela.columns:
+                    partes = []
+                    for n in map(str, col):
+                        if not n.startswith("Unnamed") and n not in partes:
+                            partes.append(n)
+                    nomes.append(" ".join(partes).strip())
+                tabela.columns = nomes
             cols = {c: str(c).lower() for c in tabela.columns}
             col_l = next((c for c, l in cols.items() if "lula" in l), None)
-            col_f = next((c for c, l in cols.items() if "fl" in l and "bolsonaro" in l), None)
-            col_i = next((c for c, l in cols.items() if "poll" in l or "institut" in l), None)
-            col_d = next((c for c, l in cols.items() if "date" in l or "data" in l), None)
+            col_f = next((c for c, l in cols.items() if "bolsonaro" in l), None)
+            col_i = next((c for c, l in cols.items() if "pollster" in l or "institut" in l), None)
+            col_d = next((c for c, l in cols.items() if any(k in l for k in ("period", "date", "data", "fieldwork"))), None)
+            col_m = next((c for c, l in cols.items() if "margin" in l), None)
+            col_u = next((c for c, l in cols.items() if "undec" in l or "blank" in l), None)
             if all([col_l, col_f, col_i, col_d]):
                 web = tabela[[col_i, col_d, col_l, col_f]].copy()
                 web.columns = ["instituto", "data_fim", "lula", "flavio"]
-                web["margem"], web["base"], web["fonte"] = MARGEM_PADRAO, "total", "wikipedia"
-                registrar("Pesquisas nacionais (Wikipédia)", True, f"{len(web)} linhas raspadas")
+                web["margem"] = tabela[col_m].map(_pct) if col_m else MARGEM_PADRAO
+                web["margem"] = web["margem"].fillna(MARGEM_PADRAO)
+                # pesquisas com menos de 5% de indecisos/brancos usam método diferente: ficam fora da média
+                indec = tabela[col_u].map(_pct) if col_u else None
+                web["base"] = "total" if indec is None else indec.map(lambda v: "baixo_indeciso" if v is not None and v < 5 else "total")
+                web["fonte"] = "wikipedia"
+                registrar("Pesquisas nacionais (Wikipédia)", True, f"{len(web)} linhas lidas")
                 return pd.concat([web, seed], ignore_index=True)
         raise ValueError("tabela com Lula e Flávio não encontrada")
     except Exception as erro:
@@ -307,12 +322,23 @@ def extrair_eleitorado(offline: bool) -> dict:
             print("[extrair] baixando perfil do eleitorado do TSE (pode demorar alguns minutos)...")
             conteudo = _get(TSE_ELEITORADO_URL, 600).content
             with zipfile.ZipFile(io.BytesIO(conteudo)) as z:
-                nome = next(n for n in z.namelist() if n.lower().endswith(".csv"))
                 partes = []
-                with z.open(nome) as f:
-                    for bloco in pd.read_csv(f, sep=";", encoding="latin-1", usecols=["SG_UF", "QT_ELEITORES_PERFIL"],
-                                             chunksize=1_000_000):
-                        partes.append(bloco.groupby("SG_UF")["QT_ELEITORES_PERFIL"].sum())
+                for nome in [n for n in z.namelist() if n.lower().endswith(".csv")]:
+                    with z.open(nome) as f:
+                        cab = [c.strip().strip('"').lstrip("\ufeff") for c in
+                               pd.read_csv(f, sep=";", encoding="latin-1", nrows=0).columns]
+                    col_uf = next((c for c in cab if c == "SG_UF"), None)
+                    col_qt = "QT_ELEITORES_PERFIL" if "QT_ELEITORES_PERFIL" in cab else \
+                        next((c for c in cab if c.startswith("QT_ELEITORES")), None)
+                    if not (col_uf and col_qt):
+                        continue
+                    with z.open(nome) as f:
+                        for bloco in pd.read_csv(f, sep=";", encoding="latin-1", usecols=lambda c: c.strip().strip('"').lstrip("\ufeff") in (col_uf, col_qt),
+                                                 chunksize=1_000_000):
+                            bloco.columns = [c.strip().strip('"').lstrip("\ufeff") for c in bloco.columns]
+                            partes.append(bloco.groupby(col_uf)[col_qt].sum())
+                if not partes:
+                    raise ValueError(f"nenhum CSV com SG_UF e QT_ELEITORES em {z.namelist()[:5]}")
             tab = pd.concat(partes).groupby(level=0).sum().rename("eleitores").reset_index()
             tab.columns = ["uf", "eleitores"]
             tab.to_csv(cache_csv, index=False)
@@ -491,7 +517,9 @@ def _data(valor) -> pd.Timestamp:
     texto = str(valor)
     if re.fullmatch(r"\d{4}-\d{2}-\d{2}", texto):
         return pd.to_datetime(texto, format="%Y-%m-%d")
-    texto = re.sub(r"^\d{1,2}\s*[–-]\s*", "", texto)
+    texto = re.split(r"\s*[–-]\s*", texto)[-1].strip()      # "30 Aug – 2 Sep" -> "2 Sep"
+    if not re.search(r"\d{4}", texto):
+        texto += " 2026"
     return pd.to_datetime(texto, errors="coerce", dayfirst=True)
 
 
@@ -596,7 +624,7 @@ def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticia
     dados = {
         "atualizado": atualizado, "eleicao": DATA_ELEICAO, "comparecimento": COMPARECIMENTO, "media": media,
         "pesquisas": [{"i": r.instituto, "d": dia(r.data_fim), "l": r.lula, "f": r.flavio, "base": r.base}
-                      for r in pesq.head(8).itertuples()],
+                      for r in pesq.drop_duplicates("instituto").head(10).itertuples()],
         "seg2t": [{"i": r.instituto, "d": dia(pd.to_datetime(r.data_fim)), "l": r.lula, "f": r.flavio,
                    "base": "validos" if r.instituto == "AtlasIntel" else "total"} for r in seg.itertuples()],
         "ufs": [{"uf": r.uf, "regiao": r.regiao, "v22": r.vencedor_2022, "l26": r.lider_2026, "gov": r.governo_alinhamento,
