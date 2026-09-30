@@ -3,8 +3,9 @@ name: Atualizar painel das eleições
 on:
   schedule:
     # Horários em UTC (Brasília = UTC-3). O GitHub pode atrasar alguns minutos.
-    - cron: "0 10 * * *"            # 07h00 de Brasília: versão da manhã
-    - cron: "0 1 * * *"             # 22h00 de Brasília: depois das divulgações da noite
+    - cron: "0 11 * * *"            # 08h00 de Brasília: depois dos primeiros noticiários
+    - cron: "0 16 * * *"            # 13h00 de Brasília: notícias da manhã
+    - cron: "0 23 * * *"            # 20h00 de Brasília: tarde e início da noite
     - cron: "*/15 20-23 4,25 10 *"  # dias de votação (4/10 e 25/10): a cada 15 min das 17h às 20h45
     - cron: "*/15 0-2 5,26 10 *"    # ... e das 21h às 23h45
   push:
