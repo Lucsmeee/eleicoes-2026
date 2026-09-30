@@ -527,6 +527,7 @@ def tratar(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["instituto"] = (df["instituto"].astype(str).str.replace(r"\[.*?\]", "", regex=True)
                        .str.split("/").str[0].str.strip())
+    df["instituto"] = df["instituto"].replace({"Real Time": "Real Time Big Data", "Genial": "Quaest"})
     df["data_fim"] = df["data_fim"].map(_data)
     for col in ["lula", "flavio", "margem"]:
         df[col] = df[col].map(_pct)
