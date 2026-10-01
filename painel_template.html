@@ -11,6 +11,7 @@
 :root{
   --bg:#EEF1F4; --panel:#FFFFFF; --ink:#16222E; --muted:#5B6875; --line:#D5DCE3;
   --lula:#B3261E; --flavio:#1D4E89; --empate:#B8860B; --neutro:#8A96A3; --vazio:#E3E8ED;
+  --g-lula:#B3261E; --g-flavio:#2E66B0; --g-aprova:#00826E; --g-desaprova:#C2410C;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -18,11 +19,13 @@
   :root:not([data-theme="light"]){
     --bg:#121A22; --panel:#1A242E; --ink:#E6ECF1; --muted:#9AA7B4; --line:#2C3946;
     --lula:#E0605A; --flavio:#6FA3E0; --empate:#D9A93A; --neutro:#6D7A87; --vazio:#24303B;
+    --g-lula:#E0605A; --g-flavio:#5C93DA; --g-aprova:#1FA08E; --g-desaprova:#D4692A;
   }
 }
 :root[data-theme="dark"]{
   --bg:#121A22; --panel:#1A242E; --ink:#E6ECF1; --muted:#9AA7B4; --line:#2C3946;
   --lula:#E0605A; --flavio:#6FA3E0; --empate:#D9A93A; --neutro:#6D7A87; --vazio:#24303B;
+  --g-lula:#E0605A; --g-flavio:#5C93DA; --g-aprova:#1FA08E; --g-desaprova:#D4692A;
 }
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -121,6 +124,51 @@ button:focus-visible{outline:3px solid var(--empate);outline-offset:2px}
 .nw a{color:var(--ink);font-weight:600;line-height:1.3;text-decoration:none}.nw a:hover{text-decoration:underline}
 .nw p{font-size:.9rem;color:var(--muted);margin:0}
 @media (max-width:760px){.news{grid-template-columns:minmax(0,1fr)}}
+/* EVOLUÇÃO */
+.ev-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.ev-leg{display:flex;gap:16px;font-size:.92rem;color:var(--muted)}
+.ev-leg span{display:inline-flex;align-items:center;gap:6px}
+.ev-leg i{display:inline-block;width:16px;height:2px;border-radius:1px}
+.ev-leg em{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);opacity:.5}
+.ev-box{position:relative;margin-top:14px;touch-action:pan-y}
+.ev-box svg{display:block;width:100%;overflow:visible}
+.ev-box text{font:500 12px "Barlow",sans-serif;fill:var(--muted)}
+.ev-box text.fim{font:700 13px "Barlow",sans-serif;fill:var(--ink)}
+.ev-tip{position:absolute;top:0;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.85rem;box-shadow:0 4px 14px rgba(0,0,0,.12);min-width:150px;opacity:0;transition:opacity .1s}
+.ev-tip .dt{color:var(--muted);font-size:.78rem;margin-bottom:4px}
+.ev-tip .r{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.ev-tip .r i{width:12px;height:2px;border-radius:1px;display:inline-block}
+.ev-tip .r b{font-variant-numeric:tabular-nums;min-width:40px}
+.ev-tip .ps{border-top:1px solid var(--line);margin-top:5px;padding-top:4px;color:var(--muted);font-size:.78rem;white-space:nowrap}
+.ev-filtros{display:flex;flex-wrap:wrap;gap:4px 18px;margin:14px 0 4px}
+.ev-filtros .abas{margin:0 0 10px}
+.ev-panel{margin-top:14px}
+.ev-leg{flex-wrap:wrap}
+.ev-leg svg{display:inline-block;vertical-align:middle}
+.ev-box svg:focus:not(:focus-visible){outline:none}
+.ev-box svg{cursor:crosshair}
+.ev-det{display:none;margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.92rem;background:color-mix(in srgb,var(--vazio) 45%,var(--panel))}
+.ev-det.on{display:block}
+.ev-det .cab{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.ev-det .cab b{font-family:"Barlow Condensed",sans-serif;font-size:1.15rem}
+.ev-det .fechar{font:600 .85rem "Barlow",sans-serif;background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:2px 10px;cursor:pointer}
+.ev-det .vars{display:flex;flex-wrap:wrap;gap:6px 18px;margin:4px 0 8px}
+.ev-det .vars span{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.ev-det .vars i{width:14px;height:0;border-top:2.5px solid;display:inline-block}
+.ev-det .up{color:#2E7D4F;font-weight:600}.ev-det .dn{color:#B45309;font-weight:600}.ev-det .eq{color:var(--muted);font-weight:600}
+.ev-det ul{margin:4px 0 0;padding-left:0;list-style:none}
+.ev-det li{padding:6px 0;border-top:1px solid var(--line)}
+.ev-det li .dt{color:var(--muted);font-size:.8rem;margin-right:6px}
+.ev-det li .tg{font:600 .72rem "Barlow",sans-serif;padding:1px 7px;border-radius:999px;color:#fff;margin-right:6px}
+.ev-det li p{margin:2px 0 0;color:var(--muted);font-size:.85rem}
+.ev-det .aviso{color:var(--muted);font-size:.8rem;margin:8px 0 0}
+.ev-vazio{color:var(--muted);padding:30px 0;text-align:center}
+details.tabela{margin-top:10px;font-size:.9rem}
+details.tabela summary{cursor:pointer;color:var(--muted)}
+details.tabela table{border-collapse:collapse;width:100%;margin-top:8px;font-variant-numeric:tabular-nums}
+details.tabela th,details.tabela td{text-align:left;padding:4px 6px;border-top:1px solid var(--line)}
+details.tabela td.n,details.tabela th.n{text-align:right}
+.tab-scroll{max-height:320px;overflow:auto}
 footer{margin-top:48px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
 footer p{max-width:none}
 
@@ -153,6 +201,36 @@ footer p{max-width:none}
     <div id="seg2t"></div>
   </div>
 </header>
+
+<section aria-labelledby="t-evo">
+  <h2 id="t-evo">Evolução no tempo</h2>
+  <p class="sub">Como a disputa mudou ao longo do ano. Os filtros valem para os três gráficos. Clique em qualquer dia de um gráfico para ver quanto cada linha subiu ou caiu e os fatos da campanha naquele período; as marcas no pé do gráfico são esses fatos.</p>
+  <div class="ev-filtros">
+    <div class="abas" role="group" aria-label="Período dos gráficos" id="ev-abas"></div>
+    <div class="abas" role="group" aria-label="Candidatos" id="ev-cand"></div>
+  </div>
+  <div class="panel ev-panel" id="p-voto">
+    <div class="ev-top"><h3 style="margin:0">Intenção de voto, 1º turno</h3><div class="ev-leg" id="leg-voto" aria-hidden="true"></div></div>
+    <div class="ev-box" id="ev-voto"></div>
+    <div class="ev-det" id="det-voto" aria-live="polite"></div>
+    <p class="nota" id="nota-voto"></p>
+    <details class="tabela"><summary>Ver as pesquisas em tabela</summary><div class="tab-scroll" id="tab-voto"></div></details>
+  </div>
+  <div class="panel ev-panel" id="p-rej">
+    <div class="ev-top"><h3 style="margin:0">Rejeição: não votaria de jeito nenhum</h3><div class="ev-leg" id="leg-rej" aria-hidden="true"></div></div>
+    <div class="ev-box" id="ev-rej"></div>
+    <div class="ev-det" id="det-rej" aria-live="polite"></div>
+    <p class="nota" id="nota-rej"></p>
+    <details class="tabela"><summary>Ver as pesquisas em tabela</summary><div class="tab-scroll" id="tab-rej"></div></details>
+  </div>
+  <div class="panel ev-panel" id="p-aprov">
+    <div class="ev-top"><h3 style="margin:0">Aprovação do governo Lula</h3><div class="ev-leg" id="leg-aprov" aria-hidden="true"></div></div>
+    <div class="ev-box" id="ev-aprov"></div>
+    <div class="ev-det" id="det-aprov" aria-live="polite"></div>
+    <p class="nota" id="nota-aprov"></p>
+    <details class="tabela"><summary>Ver as pesquisas em tabela</summary><div class="tab-scroll" id="tab-aprov"></div></details>
+  </div>
+</section>
 
 <section aria-labelledby="t-news">
   <h2 id="t-news">Notícias do dia</h2>
@@ -269,6 +347,202 @@ const T={L:"Lula",F:"Flávio",E:"Empate técnico",B:"Bolsonaro","?":"sem pesquis
     <span class="dif ${d>0?"lula":d<0?"flavio":""}">${d===0?"Empate":(d>0?"Lula":"Flávio")+" +"+fmt(Math.abs(Math.round(d*10)/10))}</span></div>`}).join("");
   $("nota-pesq").textContent=D.pesquisas.some(p=>p.base!=="total")?"* Quase sem indecisos ou brancos (votos válidos ou método próprio do instituto), por isso os números são mais altos; ficam fora da média.":"";
   $("seg2t").innerHTML=D.seg2t.map(p=>`<div class="duelo"><span>${p.i} <span class="sub">${p.d}${p.base==="validos"?", válidos":""}</span></span><span><b class="lula">${fmt(p.l)}%</b> × <b class="flavio">${fmt(p.f)}%</b></span></div>`).join("");
+})();
+
+// Evolução no tempo: intenção de voto, rejeição e aprovação (gráficos de linha com fatos da campanha)
+(function(){
+  const sec=$("t-evo").closest("section"), V=D.historico, A=D.aprovacao, R=D.rejeicao||[];
+  const NS="http://www.w3.org/2000/svg", MES=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"], DIA=864e5;
+  const dt=s=>new Date(s+"T12:00:00"), aa=t=>String(t.getFullYear()).slice(2);
+  const dd=t=>`${t.getDate()}/${t.getMonth()+1}/${aa(t)}`, dm=t=>`${t.getDate()}/${t.getMonth()+1}`;
+  const el=(tag,at,pai)=>{const e=document.createElementNS(NS,tag);for(const k in at)e.setAttribute(k,at[k]);if(pai)pai.appendChild(e);return e;};
+  const h=(tag,cls,txt,pai)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;if(pai)pai.appendChild(e);return e;};
+  const COR={L:"var(--g-lula)",F:"var(--g-flavio)",N:"var(--muted)",G:"var(--g-lula)"}, NOME={L:"Lula",F:"Flávio"};
+  const EV=(D.eventos||[]).map(e=>({c:e.c,titulo:e.t,x:e.x,f:e.f,t:dt(e.d)})).sort((a,b)=>a.t-b.t);
+  const TRACO=[null,"7 4","2 3"];
+  const G=[];
+
+  if(V&&V.media&&V.media.length>1){
+    const med=V.media.map(r=>({t:dt(r[0]),l:r[1],f:r[2],n:r[3]}));
+    G.push({id:"voto",comparar:14,
+      linhas:[{nome:"Lula",cand:"L",cor:COR.L,dados:med.map(m=>({t:m.t,v:m.l,n:m.n}))},
+              {nome:"Flávio",cand:"F",cor:COR.F,dados:med.map(m=>({t:m.t,v:m.f,n:m.n}))}],
+      pontos:V.pontos.flatMap(r=>[{t:dt(r[0]),i:r[1],v:r[2],cand:"L"},{t:dt(r[0]),i:r[1],v:r[3],cand:"F"}]),
+      cols:["Lula","Flávio"], linhasTab:V.pontos.map(r=>[dt(r[0]),r[1],r[2],r[3]]),
+      nota:n=>`Linha: média móvel, a pesquisa mais recente de cada instituto nos ${V.janela} dias anteriores (a mesma conta do topo; em fases com poucas pesquisas a janela vai até 30 dias). Pontos: cada pesquisa. ${n} pesquisas no período, da Wikipédia mais o snapshot manual.`+(V.fora?" Pesquisas quase sem indecisos (votos válidos ou método próprio) ficam fora porque têm números mais altos.":"")});
+  }
+  if(R.length){
+    const inst=[...new Set(R.map(r=>r[1]))].sort((a,b)=>(b==="Quaest")-(a==="Quaest")), linhas=[], pontos=[], series=[];
+    inst.forEach(i=>{
+      const rs=R.filter(r=>r[1]===i).map(r=>({t:dt(r[0]),l:r[2],f:r[3]})).sort((a,b)=>a.t-b.t);
+      rs.forEach(r=>["L","F"].forEach(c=>pontos.push({t:r.t,i,v:c==="L"?r.l:r.f,cand:c})));
+      if(rs.length>1){const traco=series.length<TRACO.length?TRACO[series.length]:"2 3";series.push([i,traco]);
+        ["L","F"].forEach(c=>linhas.push({nome:`${NOME[c]} · ${i}`,curto:NOME[c],inst:i,cand:c,cor:COR[c],traco,rodadas:true,
+          dados:rs.map(r=>({t:r.t,v:c==="L"?r.l:r.f}))}));}
+    });
+    const avulsos=inst.filter(i=>!series.some(s=>s[0]===i));
+    G.push({id:"rej",linhas,pontos,series,avulsos,cols:["Lula","Flávio"],linhasTab:R.map(r=>[dt(r[0]),r[1],r[2],r[3]]),
+      nota:n=>`Uma linha por instituto, ligando as rodadas: cada um pergunta de um jeito (a Quaest só conta quem conhece o candidato, por isso os números dela são mais altos), então não dá para tirar média entre eles. Cor = candidato; tipo de linha = instituto.`+(avulsos.length?` ${avulsos.join(", ")}: rodada única, só como ponto.`:"")+` ${n} rodadas no período, do snapshot manual.`});
+  }
+  if(A&&A.media&&A.media.length>1){
+    const med=A.media.map(r=>({t:dt(r[0]),a:r[1],d:r[2],n:r[3]}));
+    G.push({id:"aprov",comparar:30,soLula:true,
+      linhas:[{nome:"Aprova",cand:"G",cor:"var(--g-aprova)",dados:med.map(m=>({t:m.t,v:m.a,n:m.n}))},
+              {nome:"Desaprova",cand:"G",cor:"var(--g-desaprova)",dados:med.map(m=>({t:m.t,v:m.d,n:m.n}))}],
+      pontos:A.pontos.flatMap(r=>[{t:dt(r[0]),i:r[1],v:r[2],cand:"G",cor:"var(--g-aprova)"},{t:dt(r[0]),i:r[1],v:r[3],cand:"G",cor:"var(--g-desaprova)"}]),
+      cols:["Aprova","Desaprova"],linhasTab:A.pontos.map(r=>[dt(r[0]),r[1],r[2],r[3]]),
+      nota:n=>`Linha: média da rodada mais recente de cada instituto nos ${A.janela} dias anteriores. Pergunta "aprova ou desaprova a maneira de Lula governar"; quem não sabe fica de fora, por isso a soma não dá 100%. ${n} pesquisas no período, do snapshot manual.`});
+  }
+  if(!G.length){sec.hidden=true;return;}
+  ["voto","rej","aprov"].forEach(id=>{if(!G.some(g=>g.id===id))$("p-"+id).hidden=true;});
+
+  const todas=G.flatMap(g=>g.linhas.flatMap(l=>l.dados.map(d=>d.t)));
+  const fim=new Date(Math.max(...todas)), ini=new Date(Math.min(...todas));
+  const OP={"30":["30 dias",30],"90":["90 dias",90],"tudo":[`Desde ${MES[ini.getMonth()]}/${aa(ini)}`,1e5]};
+  const CAND={LF:"Os dois",L:"Só Lula",F:"Só Flávio"};
+  let per="tudo", filtro="LF";
+  $("ev-abas").innerHTML=Object.entries(OP).map(([k,[r]])=>`<button data-per="${k}">${r}</button>`).join("");
+  $("ev-cand").innerHTML=Object.entries(CAND).map(([k,r])=>`<button data-cand="${k}">${r}</button>`).join("");
+  const ve=c=>c==="G"||c==="N"?true:(filtro==="LF"||filtro===c);
+  const evVis=g=>EV.filter(e=>g.soLula?e.c!=="F":ve(e.c));
+  const valor=(l,t)=>{let r=null;for(const d of l.dados){if(d.t-t<=DIA/2)r=d;else break;}return r;};
+  const traco=(svg,cor,tr,larg)=>{const s=el("svg",{width:larg||18,height:8});el("line",{x1:1,x2:(larg||18)-1,y1:4,y2:4,stroke:cor,"stroke-width":2.5,"stroke-linecap":"round",...(tr?{"stroke-dasharray":tr}:{})},s);return s;};
+
+  G.forEach(g=>{
+    const box=$("ev-"+g.id), det=$("det-"+g.id);
+    const svg=el("svg",{role:"img",tabindex:"0"},box);
+    const tip=h("div","ev-tip",null,box);tip.setAttribute("aria-hidden","true");
+    const vazio=h("div","ev-vazio",null,box);
+    let X,Y,W,Hh,mg,xs=[],L=[],idx=null,sel=null,cruz,marc=[];
+    g.render=function(){
+      const corte=new Date(fim.getTime()-OP[per][1]*DIA);
+      // legenda
+      const leg=$("leg-"+g.id);leg.replaceChildren();
+      const bloqueado=g.soLula&&filtro==="F";
+      vazio.textContent=bloqueado?"A aprovação mede o governo, então só existe para Lula. Escolha \"Os dois\" ou \"Só Lula\".":"";
+      vazio.style.display=bloqueado?"block":"none";svg.style.display=bloqueado?"none":"block";
+      if(bloqueado){tip.style.opacity=0;det.classList.remove("on");$("nota-"+g.id).textContent="";return;}
+      if(g.id==="rej"){
+        ["L","F"].filter(ve).forEach(c=>{const sp=h("span",null,null,leg);sp.append(traco(null,COR[c]),document.createTextNode(NOME[c]));});
+        g.series.forEach(([i,tr])=>{const sp=h("span",null,null,leg);sp.append(traco(null,"var(--muted)",tr,22),document.createTextNode(i));});
+        if(g.avulsos.length){const sp=h("span",null,null,leg);h("em",null,null,sp);sp.append(document.createTextNode(g.avulsos.join(", ")));}
+      }else{
+        g.linhas.filter(l=>ve(l.cand)).forEach(l=>{const sp=h("span",null,null,leg);sp.append(traco(null,l.cor),document.createTextNode(l.nome));});
+        const sp=h("span",null,null,leg);h("em",null,null,sp);sp.append(document.createTextNode("cada pesquisa"));
+      }
+      L=g.linhas.filter(l=>ve(l.cand)).map(l=>({...l,dados:l.dados.filter(d=>d.t>=corte)})).filter(l=>l.dados.length);
+      const P=g.pontos.filter(p=>ve(p.cand)&&p.t>=corte);
+      W=box.clientWidth||600;Hh=W<600?240:300;
+      const rotulo=l=>`${l.curto||l.nome} ${fmt(l.dados[l.dados.length-1].v)}%`, comTraco=L.some(l=>l.traco!==undefined);
+      mg={l:34,r:Math.min(170,22+(comTraco?18:0)+Math.max(...L.map(l=>rotulo(l).length),6)*7.2),t:12,b:26};
+      const vals=L.flatMap(l=>l.dados.map(d=>d.v)).concat(P.map(p=>p.v));
+      if(!vals.length){svg.innerHTML="";return;}
+      const y0=Math.floor((Math.min(...vals)-1)/5)*5,y1=Math.ceil((Math.max(...vals)+1)/5)*5;
+      const tt=L.flatMap(l=>l.dados.map(d=>+d.t)).concat(P.map(p=>+p.t));
+      const t0=Math.min(...tt),t1=Math.max(fim.getTime(),t0+DIA);
+      X=t=>mg.l+(t-t0)/(t1-t0)*(W-mg.l-mg.r);Y=v=>mg.t+(y1-v)/(y1-y0)*(Hh-mg.t-mg.b);
+      xs=[...new Set(L.flatMap(l=>l.dados.map(d=>+d.t)))].sort((a,b)=>a-b).map(t=>new Date(t));
+      svg.innerHTML="";svg.setAttribute("viewBox",`0 0 ${W} ${Hh}`);svg.setAttribute("height",Hh);
+      svg.setAttribute("aria-label",L.map(l=>{const u=l.dados[l.dados.length-1];return `${l.nome} ${fmt(u.v)}% em ${dd(u.t)}`}).join("; ")+". Use as setas para andar pelas datas e Enter para ver o que mudou.");
+      for(let v=y0;v<=y1;v+=5){el("line",{x1:mg.l,x2:W-mg.r,y1:Y(v),y2:Y(v),stroke:"var(--line)","stroke-width":1},svg);
+        el("text",{x:mg.l-6,y:Y(v)+4,"text-anchor":"end"},svg).textContent=v+"%";}
+      const ticks=[],curto=(t1-t0)/DIA<75;
+      if(curto){for(let t=t1;t>=t0;t-=7*DIA)ticks.push(new Date(t));}
+      else{const d=new Date(t0);d.setDate(1);d.setMonth(d.getMonth()+1);for(;d<=fim;d.setMonth(d.getMonth()+1))ticks.push(new Date(d));}
+      const passo=Math.ceil(ticks.length/(W<600?5:9));
+      ticks.filter((_,k)=>k%passo===0).forEach(t=>{const x=X(t);
+        el("line",{x1:x,x2:x,y1:Hh-mg.b,y2:Hh-mg.b+4,stroke:"var(--line)"},svg);
+        el("text",{x,y:Hh-6,"text-anchor":"middle"},svg).textContent=curto?dm(t):(t.getMonth()===0?`jan/${aa(t)}`:MES[t.getMonth()]);});
+      // fatos da campanha no pé do gráfico
+      const ge=el("g",{"aria-hidden":"true"},svg);
+      evVis(g).filter(e=>e.t>=t0&&e.t<=t1).forEach(e=>{const x=X(e.t),y=Hh-mg.b-6;
+        el("line",{x1:x,x2:x,y1:mg.t,y2:Hh-mg.b,stroke:COR[e.c],"stroke-width":1,"stroke-dasharray":"2 4",opacity:.35},ge);
+        el("path",{d:`M${x} ${y-5}L${x+5} ${y}L${x} ${y+5}L${x-5} ${y}Z`,fill:COR[e.c],stroke:"var(--panel)","stroke-width":1.5},ge);});
+      // seleção
+      if(sel&&sel>=t0&&sel<=t1)el("line",{x1:X(sel),x2:X(sel),y1:mg.t,y2:Hh-mg.b,stroke:"var(--ink)","stroke-width":1.5,opacity:.7},svg);
+      const gp=el("g",{"aria-hidden":"true"},svg);
+      P.forEach(p=>el("circle",{cx:X(p.t),cy:Y(p.v),r:4,fill:p.cor||COR[p.cand],"fill-opacity":.28},gp));
+      const caminho=l=>l.dados.map((m,j)=>(j&&!l.rodadas&&m.t-l.dados[j-1].t>1.5*DIA?"M":j?"L":"M")+X(m.t).toFixed(1)+" "+Y(m.v).toFixed(1)).join(" ");
+      L.forEach(l=>el("path",{d:caminho(l),fill:"none",stroke:"var(--panel)","stroke-width":6,"stroke-linejoin":"round","stroke-linecap":"round"},svg));
+      L.forEach(l=>{const d=caminho(l);
+        el("path",{d,fill:"none",stroke:l.cor,"stroke-width":2.5,"stroke-linejoin":"round","stroke-linecap":"round",...(l.traco?{"stroke-dasharray":l.traco}:{})},svg);
+        if(l.rodadas)l.dados.forEach(m=>el("circle",{cx:X(m.t),cy:Y(m.v),r:3,fill:l.cor},svg));});
+      // rótulos no fim das linhas, sem sobrepor
+      const rot=L.map(l=>{const u=l.dados[l.dados.length-1];return{l,u,y:Y(u.v),yt:Y(u.v)};}).sort((a,b)=>a.y-b.y);
+      for(let k=1;k<rot.length;k++)if(rot[k].yt-rot[k-1].yt<15)rot[k].yt=rot[k-1].yt+15;
+      rot.forEach(({l,u,y,yt})=>{el("circle",{cx:X(u.t),cy:y,r:4.5,fill:l.cor,stroke:"var(--panel)","stroke-width":2},svg);
+        let x=X(fim)+10;
+        if(comTraco){el("line",{x1:x,x2:x+14,y1:yt,y2:yt,stroke:l.cor,"stroke-width":2.5,...(l.traco?{"stroke-dasharray":l.traco==="7 4"?"5 3":l.traco}:{})},svg);x+=18;}
+        el("text",{x,y:yt+4,class:"fim"},svg).textContent=rotulo(l);});
+      cruz=el("line",{y1:mg.t,y2:Hh-mg.b,stroke:"var(--muted)","stroke-width":1,opacity:0},svg);
+      marc=L.map(l=>el("circle",{r:5,fill:l.cor,stroke:"var(--panel)","stroke-width":2,opacity:0},svg));
+      el("rect",{x:mg.l,y:0,width:W-mg.l-mg.r,height:Hh,fill:"transparent","data-hit":"1"},svg);
+      // tabela
+      const tb=document.createElement("table"),cab=tb.createTHead().insertRow();
+      ["Data","Instituto",...g.cols,"Dif."].forEach((x,k)=>{const th=h("th",k>1?"n":"",x);cab.appendChild(th);});
+      const corpo=tb.createTBody(),linhas=g.linhasTab.filter(r=>r[0]>=corte).sort((a,b)=>b[0]-a[0]);
+      linhas.forEach(r=>{const tr=corpo.insertRow(),d=Math.round((r[2]-r[3])*10)/10;
+        [dd(r[0]),r[1],fmt(r[2])+"%",fmt(r[3])+"%",d===0?"0":(d>0?g.cols[0]:g.cols[1])+" +"+fmt(Math.abs(d))].forEach((v,k)=>{const c=tr.insertCell();c.textContent=v;if(k>1)c.className="n";});});
+      $("tab-"+g.id).replaceChildren(tb);
+      $("nota-"+g.id).textContent=g.nota(linhas.length);
+      if(sel)detalhe(sel);
+      if(idx!=null&&idx<xs.length)mostrar(idx);else esconder();
+    };
+    function mostrar(k){
+      idx=k;const t=xs[k],x=X(t);
+      cruz.setAttribute("x1",x);cruz.setAttribute("x2",x);cruz.setAttribute("opacity",.6);
+      tip.replaceChildren();h("div","dt",dd(t),tip);
+      L.forEach((l,j)=>{const v=valor(l,t);if(!v){marc[j].setAttribute("opacity",0);return;}
+        marc[j].setAttribute("cx",x);marc[j].setAttribute("cy",Y(v.v));marc[j].setAttribute("opacity",1);
+        const r=h("div","r",null,tip),i=h("i",null,null,r),b=h("b",null,fmt(v.v)+"%",r);i.style.background=l.cor;
+        r.append(document.createTextNode(l.nome+(l.rodadas&&+v.t!==+t?` (${dm(v.t)})`:"")));});
+      const dia=g.pontos.filter(p=>ve(p.cand)&&Math.abs(p.t-t)<DIA/2&&(g.id!=="rej"));
+      const inst=[...new Set(dia.map(p=>p.i))];
+      if(inst.length)h("div","ps",inst.slice(0,4).map(i=>`${i}: ${dia.filter(p=>p.i===i).map(p=>fmt(p.v)).join(" × ")}`).join("\n")+(inst.length>4?`\n+${inst.length-4}`:""),tip).style.whiteSpace="pre";
+      const ev=evVis(g).filter(e=>Math.abs(e.t-t)<DIA*1.5);
+      if(ev.length)h("div","ps","◆ "+ev.map(e=>`${dm(e.t)}: ${e.titulo}`).join("\n"),tip).style.whiteSpace="pre";
+      h("div","ps","Clique para ver o que mudou",tip);
+      tip.style.opacity=1;
+      const tw=tip.offsetWidth,bw=box.clientWidth,px=x*bw/W;
+      tip.style.left=Math.max(0,Math.min(bw-tw,px+12+tw>bw?px-12-tw:px+12))+"px";tip.style.top="8px";
+    }
+    function esconder(){idx=null;if(cruz)cruz.setAttribute("opacity",0);marc.forEach(c=>c.setAttribute("opacity",0));tip.style.opacity=0;}
+    function detalhe(t){
+      sel=t;det.replaceChildren();det.classList.add("on");
+      const cab=h("div","cab",null,det);h("b",null,`O que mudou até ${dd(t)}`,cab);
+      const fx=h("button","fechar","Fechar",cab);fx.onclick=()=>{sel=null;det.classList.remove("on");g.render();};
+      const vars=h("div","vars",null,det);
+      L.forEach(l=>{const v1=valor(l,t);if(!v1)return;let v0,quando;
+        if(l.rodadas){const j=l.dados.indexOf(v1);v0=j>0?l.dados[j-1]:null;quando=v0?`desde ${dm(v0.t)}`:"primeira rodada";}
+        else{v0=valor(l,new Date(t-g.comparar*DIA));quando=`em ${g.comparar} dias`;}
+        const sp=h("span",null,null,vars),i=h("i",null,null,sp);i.style.borderColor=l.cor;if(l.traco)i.style.borderTopStyle="dashed";
+        sp.append(document.createTextNode(`${l.nome} ${fmt(v1.v)}%`));
+        if(v0){const d=Math.round((v1.v-v0.v)*10)/10,c=d>=0.5?"up":d<=-0.5?"dn":"eq";h("span",c,`${d>=0.5?"▲":d<=-0.5?"▼":"="} ${d>0?"+":""}${fmt(d)}`,sp);}
+        sp.append(document.createTextNode(` ${quando}`));});
+      const ev=evVis(g).filter(e=>e.t>t-21*DIA&&e.t<=+t+2*DIA).reverse();
+      h("div",null,ev.length?"Fatos da campanha nas 3 semanas anteriores:":"Nenhum fato marcado nas 3 semanas anteriores. A variação pode vir de notícias do dia a dia ou da troca de institutos na média.",det).style.fontWeight=ev.length?"600":"400";
+      if(ev.length){const ul=h("ul",null,null,det);ev.forEach(e=>{const li=h("li",null,null,ul);h("span","dt",dd(e.t),li);
+        const tg=h("span","tg",e.c==="N"?"Geral":NOME[e.c],li);tg.style.background=e.c==="N"?"var(--neutro)":COR[e.c];
+        h("b",null,e.titulo,li);h("p",null,`${e.x} Fonte: ${e.f}.`,li);});}
+      h("p","aviso","Os fatos são contexto, não prova de causa: a pesquisa não mede por que o eleitor mudou. Variações de até 2 pontos ficam dentro da margem de erro.",det);
+    }
+    function perto(ev){const r=svg.getBoundingClientRect(),x=(ev.clientX-r.left)*W/r.width;let b=0,bd=1e9;
+      xs.forEach((t,k)=>{const d=Math.abs(X(t)-x);if(d<bd){bd=d;b=k;}});return b;}
+    svg.addEventListener("pointermove",e=>{if(e.target.dataset&&e.target.dataset.hit)mostrar(perto(e));});
+    svg.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")esconder();});
+    svg.addEventListener("click",e=>{if(e.target.dataset&&e.target.dataset.hit){const k=perto(e);detalhe(xs[k]);g.render();mostrar(k);}});
+    svg.addEventListener("focus",()=>mostrar(xs.length-1));
+    svg.addEventListener("blur",esconder);
+    svg.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"||e.key==="ArrowRight"){e.preventDefault();mostrar(Math.max(0,Math.min(xs.length-1,(idx??xs.length-1)+(e.key==="ArrowLeft"?-1:1))));}
+      else if(e.key==="Enter"&&idx!=null){e.preventDefault();const k=idx;detalhe(xs[k]);g.render();mostrar(k);}
+      else if(e.key==="Escape"){esconder();}});
+    let larg=0;new ResizeObserver(()=>{if(box.clientWidth!==larg){larg=box.clientWidth;g.render();}}).observe(box);
+  });
+  const tudo=()=>{document.querySelectorAll("#ev-abas button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.per===per));
+    document.querySelectorAll("#ev-cand button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.cand===filtro));G.forEach(g=>g.render());};
+  $("ev-abas").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;per=b.dataset.per;tudo();});
+  $("ev-cand").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;filtro=b.dataset.cand;tudo();});
+  tudo();
 })();
 
 // Notícias
