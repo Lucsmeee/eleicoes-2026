@@ -100,7 +100,10 @@ SEED_UF = [
     ("SE", "Nordeste", "L", "L", 54, 26, "L", 62, 28), ("SP", "Sudeste", "B", "F", 30, 36, "F", 36, 42),
     ("TO", "Norte", "L", "E", 37, 35, "N", 40, 48),
 ]
-MARGEM_UF = {"SP": 2.0}  # demais estados: 3 p.p.
+# Margem de erro da pesquisa de 2º turno usada em cada UF (empate técnico = diferença até 2× a margem).
+# Real Time Big Data e AtlasIntel estaduais: 2 p.p.; Quaest (exceto SP) e Veritá: 3 p.p. (padrão).
+MARGEM_UF = {"SP": 2.0, "BA": 2.0, "CE": 2.0, "PR": 2.0, "RS": 2.0, "PA": 2.0, "AL": 2.0, "ES": 2.0, "TO": 2.0,
+             "GO": 2.0, "SE": 2.0, "SC": 2.0, "MS": 2.0, "AP": 2.0, "PI": 2.0}
 
 # Eleitorado apto 2026 – fallback quando o download do TSE falhar (uf: (eleitores, fonte)).
 # "oficial" = TSE/TRE; "estimado" = eleitorado 2022 + crescimento, ajustado para fechar o total do TSE.
