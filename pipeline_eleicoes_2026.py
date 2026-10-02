@@ -81,23 +81,24 @@ SEED_NACIONAL = [
 
 # uf, regiao, vencedor_2t_2022 (L/B), lider_1t_2026 (L/F/E), lula_1t, flavio_1t,
 # governo_alinhamento (L=aliado Lula, F=aliado Flávio, E=empate técnico, N=nenhum dos dois), lula_2t, flavio_2t
-# 1º turno: Quaest 19-23/09 (MA e PI: outros institutos; MS: Quaest de agosto).
+# 1º turno: Quaest 19-23/09, exceto SP, RJ, MG, DF e PE (Quaest 25-28/09) e PA (Quaest 22-25/09); MA e PI: outros
+# institutos; MS: Quaest de agosto.
 # 2º turno: fonte por UF em FONTE_2T_UF.
 SEED_UF = [
-    ("AC", "Norte", "B", "F", 24, 50, "F", None, None), ("AL", "Nordeste", "L", "L", 44, 32, "E", None, None),
-    ("AM", "Norte", "L", "E", 38, 32, "L", None, None), ("AP", "Norte", "B", "L", 42, 35, "F", None, None),
+    ("AC", "Norte", "B", "F", 24, 50, "F", 25, 59), ("AL", "Nordeste", "L", "L", 44, 32, "E", 53, 38),
+    ("AM", "Norte", "L", "E", 38, 32, "L", 45, 40), ("AP", "Norte", "B", "L", 42, 35, "F", 41, 45),
     ("BA", "Nordeste", "L", "L", 58, 23, "E", 64, 28), ("CE", "Nordeste", "L", "L", 55, 23, "E", 63, 28),
-    ("DF", "Centro-Oeste", "B", "F", 32, 33, "F", 38, 49), ("ES", "Sudeste", "B", "E", 31, 37, "N", None, None),
-    ("GO", "Centro-Oeste", "B", "E", 27, 33, "N", None, None), ("MA", "Nordeste", "L", "L", 59, 22, "N", None, None),
-    ("MG", "Sudeste", "L", "E", 35, 30, "F", 40, 40), ("MS", "Centro-Oeste", "B", "F", 27, 33, "F", None, None),
-    ("MT", "Centro-Oeste", "B", "F", 25, 50, "F", 30, 56), ("PA", "Norte", "L", "L", None, None, "E", None, None),
-    ("PB", "Nordeste", "L", "L", 54, 23, "L", None, None), ("PE", "Nordeste", "L", "L", 54, 21, "N", 58, 25),
-    ("PI", "Nordeste", "L", "L", 59, 20, "L", None, None), ("PR", "Sul", "B", "F", 26, 40, "F", 30, 61),
-    ("RJ", "Sudeste", "B", "F", 30, 37, "L", 36, 44), ("RN", "Nordeste", "L", "L", 52, 25, "E", None, None),
-    ("RO", "Norte", "B", "F", 19, 53, "E", None, None), ("RR", "Norte", "B", "F", 20, 59, "F", None, None),
-    ("RS", "Sul", "B", "E", 31, 35, "E", None, None), ("SC", "Sul", "B", "F", 23, 50, "F", 30, 62),
-    ("SE", "Nordeste", "L", "L", 54, 26, "L", None, None), ("SP", "Sudeste", "B", "E", 31, 34, "F", 36, 42),
-    ("TO", "Norte", "L", "E", 37, 35, "N", None, None),
+    ("DF", "Centro-Oeste", "B", "F", 32, 38, "F", 33, 48), ("ES", "Sudeste", "B", "E", 31, 37, "N", 41, 48),
+    ("GO", "Centro-Oeste", "B", "E", 27, 33, "N", 33, 57), ("MA", "Nordeste", "L", "L", 59, 22, "N", 63, 26),
+    ("MG", "Sudeste", "L", "E", 35, 31, "F", 41, 40), ("MS", "Centro-Oeste", "B", "F", 27, 33, "F", 38, 52),
+    ("MT", "Centro-Oeste", "B", "F", 25, 50, "F", 30, 56), ("PA", "Norte", "L", "L", 40, 35, "E", 44, 38),
+    ("PB", "Nordeste", "L", "L", 54, 23, "L", 60, 26), ("PE", "Nordeste", "L", "L", 58, 20, "N", 61, 24),
+    ("PI", "Nordeste", "L", "L", 59, 20, "L", 68.3, 24.4), ("PR", "Sul", "B", "F", 26, 40, "F", 30, 61),
+    ("RJ", "Sudeste", "B", "F", 31, 38, "L", 34, 44), ("RN", "Nordeste", "L", "L", 52, 25, "E", 56, 30),
+    ("RO", "Norte", "B", "F", 19, 53, "E", 27.3, 68.8), ("RR", "Norte", "B", "F", 20, 59, "F", 22, 67),
+    ("RS", "Sul", "B", "E", 31, 35, "E", 43, 53), ("SC", "Sul", "B", "F", 23, 50, "F", 30, 62),
+    ("SE", "Nordeste", "L", "L", 54, 26, "L", 62, 28), ("SP", "Sudeste", "B", "F", 30, 36, "F", 36, 42),
+    ("TO", "Norte", "L", "E", 37, 35, "N", 40, 48),
 ]
 MARGEM_UF = {"SP": 2.0}  # demais estados: 3 p.p.
 
@@ -227,8 +228,10 @@ SEED_DF = [
     ("Presidente", "1º turno", "Datafolha", "Ronaldo Caiado", "Direita", 9),
     ("Presidente", "2º turno", "Datafolha", "Flávio Bolsonaro", "Direita", 51),
     ("Presidente", "2º turno", "Datafolha", "Lula", "Esquerda", 41),
-    ("Presidente", "2º turno", "Quaest", "Flávio Bolsonaro", "Direita", 49),
-    ("Presidente", "2º turno", "Quaest", "Lula", "Esquerda", 38),
+    ("Presidente", "1º turno", "Quaest", "Flávio Bolsonaro", "Direita", 38),
+    ("Presidente", "1º turno", "Quaest", "Lula", "Esquerda", 32),
+    ("Presidente", "2º turno", "Quaest", "Flávio Bolsonaro", "Direita", 48),
+    ("Presidente", "2º turno", "Quaest", "Lula", "Esquerda", 33),
     ("Governador", "1º turno", "Quaest", "Celina Leão", "Direita", 39),
     ("Governador", "1º turno", "Quaest", "Leandro Grass", "Esquerda", 23),
     ("Governador", "1º turno", "Quaest", "Paula Belmonte", "Centro-direita", 9),
@@ -250,18 +253,30 @@ SEED_DF = [
 ]
 
 # Fonte do 1º turno por UF (padrão: Quaest 19-23/9)
-FONTE_1T_UF = {"MA": "outro instituto", "PI": "outro instituto", "MS": "Quaest, agosto"}
+FONTE_1T_UF = {"MA": "outro instituto", "PI": "outro instituto", "MS": "Quaest, agosto",
+               "SP": "Quaest 25–28/9", "RJ": "Quaest 25–28/9", "MG": "Quaest 25–28/9", "DF": "Quaest 25–28/9",
+               "PE": "Quaest 25–28/9", "PA": "Quaest 22–25/9"}
 FONTE_1T_PADRAO = "Quaest 19–23/9"
-FONTE_2T_UF = {"SP": "Quaest 19–22/9", "RJ": "Quaest 19–22/9", "MG": "Quaest 19–22/9", "DF": "Quaest 19–22/9",
-               "MT": "Quaest 21–24/9", "PE": "Quaest 19–22/9", "BA": "Real Time Big Data 23–26/9",
-               "CE": "Real Time Big Data 21–24/9", "PR": "Real Time Big Data 11–15/9",
-               "SC": "Real Time Big Data 12–16/9"}
+# 2º turno: a pesquisa estadual mais recente de Lula × Flávio em cada UF
+FONTE_2T_UF = {"SP": "Quaest 19–22/9", "RJ": "Quaest 25–28/9", "MG": "Quaest 25–28/9", "DF": "Quaest 25–28/9",
+               "PE": "Quaest 25–28/9", "MT": "Quaest 21–24/9", "MA": "Quaest 21–24/9", "RN": "Quaest 21–24/9",
+               "AM": "Quaest 20–23/9", "PB": "Quaest 18–21/9", "AC": "Quaest, setembro", "RR": "Quaest, setembro",
+               "BA": "Real Time Big Data 23–26/9", "CE": "Real Time Big Data 21–24/9",
+               "PR": "Real Time Big Data 24–28/9", "RS": "Real Time Big Data 24–28/9",
+               "PA": "Real Time Big Data 23–26/9", "AL": "Real Time Big Data 21–24/9",
+               "ES": "Real Time Big Data 21–24/9", "TO": "Real Time Big Data 21–24/9",
+               "GO": "Real Time Big Data 17–21/9", "SE": "Real Time Big Data 17–21/9",
+               "SC": "Real Time Big Data 12–16/9", "MS": "Real Time Big Data 5–9/9",
+               "AP": "Real Time Big Data 3–7/9", "RO": "Veritá 21–25/9", "PI": "AtlasIntel 28/8–2/9"}
 
 NOTAS_UF = {
-    "DF": "Datafolha: Flávio 41% × Lula 34% no 1º turno e 51% × 41% no 2º. O TSE barrou Arruda em 23/9.",
+    "DF": "Quaest 25–28/9: Flávio 38% × Lula 32% no 1º turno e 48% × 33% no 2º. Datafolha 22–24/9: 41% × 34% e "
+          "51% × 41%. O TSE barrou Arruda em 23/9.",
     "RJ": "Datafolha dá Lula 38% × 37% no 1º turno.",
     "GO": "Caiado tem 23% no estado.",
     "MT": "2º turno: Quaest 21–24/9.",
+    "TO": "Quaest 19–22/9 dá empate em 44% no 2º turno; a Real Time Big Data, mais recente, Flávio 48% × 40%.",
+    "PA": "Real Time Big Data 23–26/9 dá Lula 45% × 36% no 1º turno.",
 }
 
 NOTAS_GOV = {
@@ -276,7 +291,7 @@ SENADO = {"oposicao": 27, "aliados": 23, "flutuantes": 4, "antes": 34, "depois":
 DF_PAINEL = {
     "pres1": {"fonte": "Datafolha 22–24/9", "itens": [["Flávio", 41, "F"], ["Lula", 34, "L"], ["Caiado", 9, "F"],
                                                        ["Cury", 4, "N"], ["Renan Santos", 3, "N"], ["Zema", 1, "F"]]},
-    "pres2": [["Datafolha", 51, 41], ["Quaest", 49, 38], ["2022, resultado real", 58.9, 41.1]],
+    "pres2": [["Datafolha 22–24/9", 51, 41], ["Quaest 25–28/9", 48, 33], ["2022, resultado real", 58.9, 41.1]],
     "rejeicao": "Rejeição (Correio/Opinião): Lula 51,3%, Flávio 40%.",
     "gov": {"fonte": "Datafolha 28/9–1/10",
             "itens": [["Celina Leão", 46, "F"], ["Leandro Grass", 22, "L"], ["Paula Belmonte", 9, "N"]],
@@ -313,7 +328,7 @@ NOTICIAS_SNAPSHOT = [
 ]
 MODELO_CLAUDE = "claude-haiku-4-5-20251001"
 
-RODAPE = ("Fontes: Datafolha, Quaest, AtlasIntel, Nexus/BTG, Real Time Big Data, Indexa/Broadcast, Meio/Ideia, Correio Braziliense/Opinião, "
+RODAPE = ("Fontes: Datafolha, Quaest, AtlasIntel, Nexus/BTG, Real Time Big Data, Veritá, Indexa/Broadcast, Meio/Ideia, Correio Braziliense/Opinião, "
           "InfoMoney, Poder360, TSE e TREs. Classificação esquerda/direita simplificada pelo alinhamento com Lula ou "
           "Flávio. Pesquisas são retratos do momento, não previsões.")
 
