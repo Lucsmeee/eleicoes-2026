@@ -64,7 +64,7 @@ UFS = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "
 # ===========================================================================
 # SNAPSHOT MANUAL – atualize estes blocos quando saírem pesquisas novas
 # ===========================================================================
-DATA_SNAPSHOT = "01/10/2026"
+DATA_SNAPSHOT = "02/10/2026"
 
 SEED_NACIONAL = [
     # instituto, data_fim, lula, flavio, margem, base  (AtlasIntel em votos válidos)
@@ -74,7 +74,7 @@ SEED_NACIONAL = [
     ("AtlasIntel",          "2026-09-28", 46.2, 43.1, 1.0,  "validos"),
     ("Quaest",              "2026-09-27", 39.0, 34.0, 2.0,  "total"),
     ("Nexus/BTG",           "2026-09-27", 42.0, 37.0, 2.0,  "total"),
-    ("Datafolha",           "2026-09-23", 40.0, 36.0, 2.0,  "total"),
+    ("Datafolha",           "2026-10-01", 42.0, 38.0, 2.0,  "total"),
     ("PoderData",           "2026-09-23", 41.0, 39.0, 1.8,  "total"),
     ("Real Time Big Data",  "2026-09-30", 43.0, 39.0, 2.0,  "total"),
 ]
@@ -169,6 +169,7 @@ SEED_APROVACAO = [
     ("AtlasIntel", "2026-09-16", 45.4, 53.6), ("Quaest", "2026-09-20", 44, 50),
     ("Datafolha", "2026-09-24", 47, 50), ("Quaest", "2026-09-27", 46, 49),
     ("AtlasIntel", "2026-09-28", 45.2, 53.6), ("Indexa", "2026-09-29", 46, 51),
+    ("Datafolha", "2026-10-01", 48, 49),
 ]
 # Rejeição ("não votaria de jeito nenhum"): instituto, data_fim, lula, flavio.
 # Cada instituto pergunta de um jeito (a Quaest só conta quem conhece o candidato), então o gráfico mostra uma linha
@@ -180,6 +181,7 @@ SEED_REJEICAO = [
     ("Quaest", "2026-09-13", 55, 55), ("Datafolha", "2026-09-16", 47, 47),
     ("Quaest", "2026-09-20", 55, 56), ("Datafolha", "2026-09-24", 45, 45),
     ("Quaest", "2026-09-27", 55, 56), ("Nexus", "2026-09-27", 48, 51),
+    ("Datafolha", "2026-10-01", 45, 45),
 ]
 
 # Fatos da campanha marcados nos gráficos (ao clicar num dia, o painel lista os fatos das 3 semanas anteriores).
@@ -200,6 +202,7 @@ EVENTOS = [
     ("2026-09-11", "F", "TSE torna Pablo Marçal inelegível", "PRTB troca o candidato; parte do voto de Marçal fica livre.", "Wikipédia"),
     ("2026-09-25", "L", "Lula lança o Desenrola 3.0", "Renegociação de até R$ 150 bilhões em dívidas das famílias.", "Imirante"),
     ("2026-09-30", "F", "Marçal anuncia apoio a Flávio", "Soma um nome com alcance nas redes a quatro dias da eleição.", "CNN Brasil"),
+    ("2026-10-01", "N", "Globo cancela o último debate", "Flávio desiste horas antes, após o TSE vetar púlpito vazio para Lula; a emissora cita insegurança jurídica.", "Poder360"),
 ]
 
 JANELA_APROVACAO = 30   # aprovação sai com menos frequência: média da última rodada de cada instituto em 30 dias
@@ -213,7 +216,7 @@ SEED_2T_NACIONAL = [
     ("Quaest", "2026-09-27", 42.0, 42.0, 2.0),
     ("Nexus/BTG", "2026-09-27", 46.0, 44.0, 2.0),
     ("PoderData", "2026-09-23", 46.0, 45.0, 1.8),
-    ("Datafolha", "2026-09-24", 47.0, 45.0, 2.0),
+    ("Datafolha", "2026-10-01", 48.0, 45.0, 2.0),
     ("Real Time Big Data", "2026-09-30", 45.0, 46.0, 2.0),
 ]
 
@@ -231,13 +234,15 @@ SEED_DF = [
     ("Governador", "1º turno", "Quaest", "Paula Belmonte", "Centro-direita", 9),
     ("Governador", "2º turno", "Quaest", "Celina Leão", "Direita", 54),
     ("Governador", "2º turno", "Quaest", "Leandro Grass", "Esquerda", 31),
-    ("Governador", "1º turno", "Datafolha", "Celina Leão", "Direita", 37),
-    ("Governador", "1º turno", "Datafolha", "Leandro Grass", "Esquerda", 21),
-    ("Governador", "1º turno", "Datafolha", "José Roberto Arruda", "Centro-direita", 18),
-    ("Senado", "1º turno", "Datafolha", "Michelle Bolsonaro", "Direita", 22),
-    ("Senado", "1º turno", "Datafolha", "Leila do Vôlei", "Centro-esquerda", 19),
-    ("Senado", "1º turno", "Datafolha", "Bia Kicis", "Direita", 15),
-    ("Senado", "1º turno", "Datafolha", "Erika Kokay", "Esquerda", 15),
+    ("Governador", "1º turno", "Datafolha", "Celina Leão", "Direita", 46),
+    ("Governador", "1º turno", "Datafolha", "Leandro Grass", "Esquerda", 22),
+    ("Governador", "1º turno", "Datafolha", "Paula Belmonte", "Centro-direita", 9),
+    ("Governador", "2º turno", "Datafolha", "Celina Leão", "Direita", 55),
+    ("Governador", "2º turno", "Datafolha", "Leandro Grass", "Esquerda", 32),
+    ("Senado", "1º turno", "Datafolha", "Michelle Bolsonaro", "Direita", 23),
+    ("Senado", "1º turno", "Datafolha", "Bia Kicis", "Direita", 18),
+    ("Senado", "1º turno", "Datafolha", "Leila do Vôlei", "Centro-esquerda", 18),
+    ("Senado", "1º turno", "Datafolha", "Erika Kokay", "Esquerda", 13),
     ("Senado", "1º turno", "Quaest", "Michelle Bolsonaro", "Direita", 26),
     ("Senado", "1º turno", "Quaest", "Leila do Vôlei", "Centro-esquerda", 20),
     ("Senado", "1º turno", "Quaest", "Bia Kicis", "Direita", 18),
@@ -273,39 +278,38 @@ DF_PAINEL = {
                                                        ["Cury", 4, "N"], ["Renan Santos", 3, "N"], ["Zema", 1, "F"]]},
     "pres2": [["Datafolha", 51, 41], ["Quaest", 49, 38], ["2022, resultado real", 58.9, 41.1]],
     "rejeicao": "Rejeição (Correio/Opinião): Lula 51,3%, Flávio 40%.",
-    "gov": {"fonte": "Real Time Big Data 24–28/9",
-            "itens": [["Celina Leão", 47, "F"], ["Leandro Grass", 26, "L"], ["Paula Belmonte", 10, "N"], ["Cappelli", 4, "L"]],
-            "nota": "Em votos válidos, Celina tem 52% e venceria no 1º turno; no 2º, 62% × 38% contra Grass. "
+    "gov": {"fonte": "Datafolha 28/9–1/10",
+            "itens": [["Celina Leão", 46, "F"], ["Leandro Grass", 22, "L"], ["Paula Belmonte", 9, "N"]],
+            "nota": "Em votos válidos, Celina tem 53% e venceria no 1º turno; no 2º, 55% × 32% contra Grass. "
                     "O TSE barrou a candidatura de Arruda em 23/9."},
-    "sen": {"fonte": "Real Time Big Data 24–28/9",
-            "itens": [["Michelle", 27, "F"], ["Bia Kicis", 18, "F"], ["Leila", 18, "L"], ["Erika Kokay", 16, "L"],
-                      ["Sebastião Coelho", 11, "N"]],
-            "nota": "Michelle lidera; a segunda vaga tem empate técnico entre Bia Kicis, Leila e Kokay."},
+    "sen": {"fonte": "Datafolha 28/9–1/10",
+            "itens": [["Michelle", 23, "F"], ["Bia Kicis", 18, "F"], ["Leila", 18, "L"], ["Erika Kokay", 13, "L"]],
+            "nota": "Michelle lidera; Bia Kicis e Leila empatam na disputa pela segunda vaga."},
 }
 
 # Notícias do dia (usado quando não há ANTHROPIC_API_KEY). impacto: positivo | negativo | misto | neutro
-NOTICIAS_DATA = "2026-10-01"
+NOTICIAS_DATA = "2026-10-02"
 NOTICIAS_SNAPSHOT = [
-    {"titulo": "Lula não participará de debate da Globo; Flávio confirma presença", "fonte": "Congresso em Foco",
-     "url": "https://www.congressoemfoco.com.br/amp/noticia/122772/lula-nao-participara-de-debate-da-globo-flavio-confirma-presenca",
-     "candidato": "Lula", "impacto": "misto",
-     "motivo": "Evita confronto direto no último debate antes do 1º turno e dará entrevista a um podcast no mesmo horário. "
-               "Ressalva: a ausência deixa o palco para os adversários explorarem."},
-    {"titulo": "Saiba quem confirmou presença no debate da Globo", "fonte": "Gazeta do Povo",
-     "url": "https://www.gazetadopovo.com.br/eleicoes/2026/saiba-quem-confirmou-presenca-no-debate-da-globo/",
-     "candidato": "Flávio", "impacto": "misto",
-     "motivo": "Primeiro debate de TV de Flávio na campanha, com exposição nacional na reta final. Ressalva: parte dos "
-               "aliados temia que, sem Lula, ele virasse o principal alvo de Caiado, Cury e Zema."},
-    {"titulo": "Flávio chama Lula de machista por fala sobre mulher \"tomar toque\"", "fonte": "Poder360, 30/9",
-     "url": "https://www.poder360.com.br/poder-eleicoes-2026/flavio-chama-lula-de-machista-por-fala-sobre-mulher-tomar-toque/",
-     "candidato": "Lula", "impacto": "negativo",
-     "motivo": "Polêmica de reta final explorada pela campanha adversária. Ressalva: o PT diz que Lula falava de exames "
-               "preventivos e acionou o TSE contra posts que distorcem a fala."},
-    {"titulo": "Real Time Big Data: Lula tem 43% no 1º turno; Flávio, 39%", "fonte": "CNN Brasil",
-     "url": "https://www.cnnbrasil.com.br/eleicoes/real-time-big-data-lula-tem-43-no-1o-turno-flavio-39/",
+    {"titulo": "Datafolha: Lula tem 42% e Flávio 38% no 1º turno; 48% × 45% no 2º", "fonte": "Gazeta do Povo",
+     "url": "https://www.gazetadopovo.com.br/eleicoes/2026/pesquisa-eleitoral-2026/datafolha-presidente-outubro-2026-2/",
      "candidato": "Lula", "impacto": "positivo",
-     "motivo": "Quatro pontos à frente no 1º turno a três dias da eleição. Ressalva: no 2º turno Flávio tem 46% × 45%, "
-               "empate técnico."},
+     "motivo": "Mantém quatro pontos de vantagem no 1º turno e lidera o 2º na última Datafolha antes da eleição. "
+               "Ressalva: Flávio também subiu 2 pontos e o 2º turno segue dentro da margem."},
+    {"titulo": "Globo cancela debate após saída de Flávio; adversários falam em fuga", "fonte": "Poder360",
+     "url": "https://www.poder360.com.br/poder-eleicoes-2026/renan-zema-caiado-e-cury-criticam-cancelamento-de-debate-da-globo/",
+     "candidato": "Flávio", "impacto": "misto",
+     "motivo": "Evita ser o alvo de Caiado, Cury, Zema e Renan no último debate. Ressalva: abriu mão de exposição "
+               "nacional e virou alvo das críticas de que fugiu do confronto."},
+    {"titulo": "Zema chama de \"vergonha nacional\" cancelamento de debate da Globo", "fonte": "Metrópoles",
+     "url": "https://www.metropoles.com/brasil/zema-chama-de-vergonha-nacional-cancelamento-de-debate-da-globo",
+     "candidato": "Lula", "impacto": "misto",
+     "motivo": "Sem debate, Lula chega ao domingo sem confronto direto. Ressalva: Caiado e Cury culpam sua ausência "
+               "pelo cancelamento."},
+    {"titulo": "Datafolha: Lula e Flávio mantêm maior rejeição, com 45% cada", "fonte": "Vero Notícias",
+     "url": "https://veronoticias.com/politica/datafolha-lula-e-flavio-mantem-maior-rejeicao-com-45-cada/",
+     "candidato": "Lula", "impacto": "neutro",
+     "motivo": "Rejeição estável e empatada; aprovação do governo em 48% × 49% de desaprovação. Ressalva: com "
+               "rejeição igual, a disputa de 2º turno tende a ficar apertada."},
 ]
 MODELO_CLAUDE = "claude-haiku-4-5-20251001"
 
