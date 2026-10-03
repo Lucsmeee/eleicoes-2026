@@ -64,7 +64,7 @@ UFS = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "
 # ===========================================================================
 # SNAPSHOT MANUAL – atualize estes blocos quando saírem pesquisas novas
 # ===========================================================================
-DATA_SNAPSHOT = "02/10/2026"
+DATA_SNAPSHOT = "03/10/2026"
 
 SEED_NACIONAL = [
     # instituto, data_fim, lula, flavio, margem, base  (AtlasIntel em votos válidos)
@@ -77,6 +77,7 @@ SEED_NACIONAL = [
     ("Datafolha",           "2026-10-01", 42.0, 38.0, 2.0,  "total"),
     ("PoderData",           "2026-09-23", 41.0, 39.0, 1.8,  "total"),
     ("Real Time Big Data",  "2026-09-30", 43.0, 39.0, 2.0,  "total"),
+    ("CNT/MDA",             "2026-10-02", 43.1, 38.0, 2.2,  "total"),
 ]
 
 # uf, regiao, vencedor_2t_2022 (L/B), lider_1t_2026 (L/F/E), lula_1t, flavio_1t,
@@ -207,6 +208,7 @@ EVENTOS = [
     ("2026-09-25", "L", "Lula lança o Desenrola 3.0", "Renegociação de até R$ 150 bilhões em dívidas das famílias.", "Imirante"),
     ("2026-09-30", "F", "Marçal anuncia apoio a Flávio", "Soma um nome com alcance nas redes a quatro dias da eleição.", "CNN Brasil"),
     ("2026-10-01", "N", "Globo cancela o último debate", "Flávio desiste horas antes, após o TSE vetar púlpito vazio para Lula; a emissora cita insegurança jurídica.", "Poder360"),
+    ("2026-10-01", "L", "Lula vai ao Flow no horário do debate", "A entrevista passa de 10 milhões de acessos em 12 horas, com pico de 1,7 milhão de pessoas ao vivo.", "Revista Fórum"),
 ]
 
 JANELA_APROVACAO = 30   # aprovação sai com menos frequência: média da última rodada de cada instituto em 30 dias
@@ -222,6 +224,7 @@ SEED_2T_NACIONAL = [
     ("PoderData", "2026-09-23", 46.0, 45.0, 1.8),
     ("Datafolha", "2026-10-01", 48.0, 45.0, 2.0),
     ("Real Time Big Data", "2026-09-30", 45.0, 46.0, 2.0),
+    ("CNT/MDA", "2026-10-02", 47.3, 43.1, 2.2),
 ]
 
 SEED_DF = [
@@ -306,32 +309,32 @@ DF_PAINEL = {
 }
 
 # Notícias do dia (usado quando não há ANTHROPIC_API_KEY). impacto: positivo | negativo | misto | neutro
-NOTICIAS_DATA = "2026-10-02"
+NOTICIAS_DATA = "2026-10-03"
 NOTICIAS_SNAPSHOT = [
-    {"titulo": "Datafolha: Lula tem 42% e Flávio 38% no 1º turno; 48% × 45% no 2º", "fonte": "Gazeta do Povo",
-     "url": "https://www.gazetadopovo.com.br/eleicoes/2026/pesquisa-eleitoral-2026/datafolha-presidente-outubro-2026-2/",
+    {"titulo": "CNT/MDA na véspera: Lula tem 43,1% e Flávio 38%; 47,3% × 43,1% no 2º turno", "fonte": "Gazeta do Povo",
+     "url": "https://www.gazetadopovo.com.br/eleicoes/2026/pesquisa-eleitoral-2026/cnt-mda-presidente-outubro-2026-vespera-primeiro-turno/",
      "candidato": "Lula", "impacto": "positivo",
-     "motivo": "Mantém quatro pontos de vantagem no 1º turno e lidera o 2º na última Datafolha antes da eleição. "
-               "Ressalva: Flávio também subiu 2 pontos e o 2º turno segue dentro da margem."},
-    {"titulo": "Globo cancela debate após saída de Flávio; adversários falam em fuga", "fonte": "Poder360",
-     "url": "https://www.poder360.com.br/poder-eleicoes-2026/renan-zema-caiado-e-cury-criticam-cancelamento-de-debate-da-globo/",
-     "candidato": "Flávio", "impacto": "misto",
-     "motivo": "Evita ser o alvo de Caiado, Cury, Zema e Renan no último debate. Ressalva: abriu mão de exposição "
-               "nacional e virou alvo das críticas de que fugiu do confronto."},
-    {"titulo": "Zema chama de \"vergonha nacional\" cancelamento de debate da Globo", "fonte": "Metrópoles",
-     "url": "https://www.metropoles.com/brasil/zema-chama-de-vergonha-nacional-cancelamento-de-debate-da-globo",
-     "candidato": "Lula", "impacto": "misto",
-     "motivo": "Sem debate, Lula chega ao domingo sem confronto direto. Ressalva: Caiado e Cury culpam sua ausência "
-               "pelo cancelamento."},
-    {"titulo": "Datafolha: Lula e Flávio mantêm maior rejeição, com 45% cada", "fonte": "Vero Notícias",
-     "url": "https://veronoticias.com/politica/datafolha-lula-e-flavio-mantem-maior-rejeicao-com-45-cada/",
-     "candidato": "Lula", "impacto": "neutro",
-     "motivo": "Rejeição estável e empatada; aprovação do governo em 48% × 49% de desaprovação. Ressalva: com "
-               "rejeição igual, a disputa de 2º turno tende a ficar apertada."},
+     "motivo": "Lidera o 1º turno fora da margem (47,8% dos válidos) na pesquisa que mais acertou em 2022. "
+               "Ressalva: no 2º turno Flávio subiu de 40% para 43,1% desde setembro e a diferença ficou no limite da margem."},
+    {"titulo": "Lula no Flow passa de 10 milhões de acessos em 12 horas", "fonte": "Revista Fórum",
+     "url": "https://revistaforum.com.br/politica/lula-no-flow-podcast-ultrapassa-10-milhoes-de-acessos/",
+     "candidato": "Lula", "impacto": "positivo",
+     "motivo": "Ocupou o horário do debate cancelado com audiência recorde e falou com um público jovem que não é o seu. "
+               "Ressalva: audiência não é voto, e a troca do debate pelo podcast segue criticada pelos adversários."},
+    {"titulo": "Flávio faz giro por MG, SP e RJ com Nikolas e Tarcísio nas últimas 48 horas", "fonte": "Brasil em Folhas",
+     "url": "https://www.brasilemfolhas.com.br/2026/10/flavio-bolsonaro-faz-giro-por-tres-estados-na-reta-final-da-campanha/",
+     "candidato": "Flávio", "impacto": "positivo",
+     "motivo": "Fecha a campanha nos três maiores colégios, que somam mais de um terço do eleitorado, ao lado de aliados "
+               "com voto próprio. Ressalva: atos de véspera costumam mudar pouco o resultado."},
+    {"titulo": "As estratégias de Flávio e Lula no último dia antes do 1º turno", "fonte": "Metrópoles",
+     "url": "https://www.metropoles.com/brasil/as-estrategias-de-flavio-bolsonaro-e-lula-no-ultimo-dia-antes-do-1o-turno",
+     "candidato": "Flávio", "impacto": "neutro",
+     "motivo": "Os dois encerram em São Paulo, onde o Datafolha dá empate técnico; Flávio busca o voto útil da direita e "
+               "Lula mobiliza eleitores com 70 anos ou mais. Ressalva: o efeito depende do comparecimento de domingo."},
 ]
 MODELO_CLAUDE = "claude-haiku-4-5-20251001"
 
-RODAPE = ("Fontes: Datafolha, Quaest, AtlasIntel, Nexus/BTG, Real Time Big Data, Veritá, Indexa/Broadcast, Meio/Ideia, Correio Braziliense/Opinião, "
+RODAPE = ("Fontes: Datafolha, Quaest, AtlasIntel, Nexus/BTG, Real Time Big Data, Veritá, Indexa/Broadcast, Meio/Ideia, CNT/MDA, Correio Braziliense/Opinião, "
           "InfoMoney, Poder360, TSE e TREs. Classificação esquerda/direita simplificada pelo alinhamento com Lula ou "
           "Flávio. Pesquisas são retratos do momento, não previsões.")
 
@@ -749,7 +752,8 @@ def tratar(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["instituto"] = (df["instituto"].astype(str).str.replace(r"\[.*?\]", "", regex=True)
                        .str.split("/").str[0].str.strip())
-    df["instituto"] = df["instituto"].replace({"Real Time": "Real Time Big Data", "Genial": "Quaest", "Meio": "Ideia"})
+    df["instituto"] = df["instituto"].replace({"Real Time": "Real Time Big Data", "Genial": "Quaest", "Meio": "Ideia",
+                                                     "CNT": "CNT/MDA", "MDA": "CNT/MDA"})
     df["data_fim"] = df["data_fim"].map(_data)
     for col in ["lula", "flavio", "margem"]:
         df[col] = df[col].map(_pct)
