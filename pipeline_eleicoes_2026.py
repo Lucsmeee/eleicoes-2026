@@ -515,15 +515,16 @@ def _pct_tse(v) -> float:
     return float(str(v).replace(",", ".")) if v not in (None, "") else 0.0
 
 
-def _descobrir_codigo(turno: int) -> str | None:
-    """Procura no config do TSE a eleição geral federal de 2026 (estrutura pode mudar; use --codigo-eleicao se falhar)."""
+def _descobrir_codigo(turno: int, tipo: str = "federal") -> str | None:
+    """Procura no config do TSE a eleição geral de 2026 ("federal" = presidente; "estadual" = governador, senado).
+    A estrutura pode mudar; se falhar, use --codigo-eleicao / --codigo-estadual."""
     cfg = _get(f"{TSE_RESULTADOS}/comum/config/ele-c.json", 30).json()
     achados = []
 
     def andar(no):
         if isinstance(no, dict):
             texto = " ".join(str(v) for v in no.values() if isinstance(v, str)).lower()
-            if "cd" in no and "2026" in texto and "federal" in texto:
+            if "cd" in no and "2026" in texto and tipo in texto:
                 achados.append(no)
             for v in no.values():
                 andar(v)
@@ -536,43 +537,108 @@ def _descobrir_codigo(turno: int) -> str | None:
     return str(achados[0]["cd"]) if achados else None
 
 
-def extrair_resultado(offline: bool, codigo: str | None, turno: int) -> dict | None:
+def _nome(nm) -> str:
+    """'LEILA DO VÔLEI' -> 'Leila do Vôlei'."""
+    return " ".join(w if w in ("da", "de", "do", "das", "dos", "e") else w.capitalize() for w in str(nm).lower().split())
+
+
+def _partido(cc) -> str:
+    """Partido ou federação do candidato, como o TSE agrupa para dividir as cadeiras.
+    'PL' -> 'PL'; 'FEDERAÇÃO BRASIL DA ESPERANÇA - FE BRASIL(PT/PC do B/PV)' -> 'PT/PCdoB/PV'."""
+    cc = str(cc or "").strip()
+    if "(" in cc and ")" in cc:                       # federação: mostra os partidos que a compõem
+        membros = cc[cc.index("(") + 1:cc.rindex(")")].replace("PC do B", "PCdoB").strip()
+        if membros:
+            return membros
+    if " - " in cc:
+        cc = cc.split(" - ", 1)[1]
+    return cc.split("(")[0].strip() or "?"
+
+
+def _resumo_proporcional(r: dict) -> dict:
+    """Deputados: votos nominais e eleitos por partido/federação + mais votados (não guarda a lista inteira)."""
+    partidos = {}
+    for c in r["cands"]:
+        x = partidos.setdefault(c["partido"], {"p": c["partido"], "votos": 0, "eleitos": 0})
+        x["votos"] += c["votos"]
+        x["eleitos"] += int(c["eleito"])
+    tot = sum(x["votos"] for x in partidos.values()) or 1
+    lista = sorted(partidos.values(), key=lambda x: (-x["eleitos"], -x["votos"]))
+    for x in lista:
+        x["pct"] = round(x["votos"] / tot * 100, 2)
+    return {"pst": r["pst"], "partidos": lista[:20], "eleitos_total": sum(x["eleitos"] for x in lista),
+            "top": [{k: c[k] for k in ("nm", "partido", "votos", "pct", "eleito")} for c in r["cands"][:15]]}
+
+
+def _ler_tse(codigo: str, uf: str, cargo: int) -> dict:
+    """Lê o JSON simplificado de resultados do TSE (formato de 2022) para um cargo numa UF ("br" = Brasil)."""
+    cod6 = f"{int(codigo):06d}"
+    url = f"{TSE_RESULTADOS}/ele2026/{int(codigo)}/dados-simplificados/{uf}/{uf}-c{cargo:04d}-e{cod6}-r.json"
+    j = _get(url, 30).json()
+    cands = [{"nm": _nome(c.get("nm", "")), "votos": int(c.get("vap", 0) or 0), "pct": _pct_tse(c.get("pvap")),
+              "partido": _partido(c.get("cc", "")),
+              "eleito": str(c.get("e", "n")).lower() == "s" or str(c.get("st", "")).lower().startswith("eleito")}
+             for c in j.get("cand", [])]
+    cands.sort(key=lambda c: -c["votos"])
+    return {"pst": _pct_tse(j.get("pst")), "hora": j.get("hg") or "", "cands": cands}
+
+
+def _lula_flavio(cands: list[dict]) -> dict | None:
+    lula = next((c for c in cands if "LULA" in c["nm"].upper()), None)
+    flav = next((c for c in cands if "BOLSONARO" in c["nm"].upper()), None)
+    if not (lula and flav):
+        return None
+    return {"lula_pct": lula["pct"], "flavio_pct": flav["pct"], "lula_votos": lula["votos"], "flavio_votos": flav["votos"]}
+
+
+def extrair_resultado(offline: bool, codigo: str | None, turno: int, codigo_est: str | None = None,
+                      deputados: bool = True) -> dict | None:
     hoje = datetime.now(ZoneInfo("America/Sao_Paulo")).date()
     if offline or (codigo is None and hoje < date(2026, 10, 4)):
         registrar("Apuração oficial (TSE)", False, "ainda não começou" if not offline else "offline")
         return None
     try:
-        codigo = codigo or _descobrir_codigo(turno)
+        codigo = codigo or _descobrir_codigo(turno, "federal")
         if not codigo:
             raise ValueError("código da eleição não encontrado; rode com --codigo-eleicao")
-        cod6 = f"{int(codigo):06d}"
-
-        def ler(uf: str) -> dict | None:
-            url = f"{TSE_RESULTADOS}/ele2026/{int(codigo)}/dados-simplificados/{uf}/{uf}-c0001-e{cod6}-r.json"
-            j = _get(url, 30).json()
-            cands = j.get("cand", [])
-            lula = next((c for c in cands if "LULA" in str(c.get("nm", "")).upper()), None)
-            flav = next((c for c in cands if "FL" in str(c.get("nm", "")).upper() and "BOLSONARO" in str(c.get("nm", "")).upper()), None)
-            if not (lula and flav):
-                return None
-            return {"pst": _pct_tse(j.get("pst")), "lula_pct": _pct_tse(lula.get("pvap")),
-                    "flavio_pct": _pct_tse(flav.get("pvap")), "lula_votos": int(lula.get("vap", 0) or 0),
-                    "flavio_votos": int(flav.get("vap", 0) or 0)}
-
-        br = ler("br")
-        if not br:
+        br = _ler_tse(codigo, "br", 1)
+        res = _lula_flavio(br["cands"])
+        if not res:
             raise ValueError("candidatos não encontrados no JSON nacional")
-        por_uf = {}
+        res.update({"pst": br["pst"], "hora": br["hora"], "cands": br["cands"][:10], "por_uf": {}, "estados": {},
+                    "tse": {"base": TSE_RESULTADOS, "federal": str(int(codigo))}})
         for uf in UFS:
             try:
-                r = ler(uf.lower())
-                if r:
-                    por_uf[uf] = r
+                r = _ler_tse(codigo, uf.lower(), 1)
+                lf = _lula_flavio(r["cands"])
+                if lf:
+                    res["por_uf"][uf] = {"pst": r["pst"], **lf}
             except Exception:
                 pass
-        br["por_uf"] = por_uf
-        registrar("Apuração oficial (TSE)", True, f"eleição {codigo}, " + f"{br['pst']:.2f}".replace(".", ",") + f"% das seções, {len(por_uf)} UFs")
-        return br
+        # Governador (cargo 3) e Senado (cargo 5) de todas as UFs ficam na eleição estadual
+        try:
+            codigo_est = codigo_est or _descobrir_codigo(turno, "estadual")
+            if codigo_est:
+                res["tse"]["estadual"] = str(int(codigo_est))
+                for uf in UFS:
+                    for nome, cargo in (("governador", 3), ("senador", 5)):
+                        try:
+                            r = _ler_tse(codigo_est, uf.lower(), cargo)
+                            res["estados"].setdefault(uf, {})[nome] = {"pst": r["pst"], "cands": r["cands"][:8]}
+                        except Exception:
+                            pass
+                    for nome, cargo in ((("dep_federal", 6), ("dep_estadual", 8 if uf == "DF" else 7)) if deputados else ()):
+                        try:
+                            r = _ler_tse(codigo_est, uf.lower(), cargo)
+                            res["estados"].setdefault(uf, {})[nome] = _resumo_proporcional(r)
+                        except Exception:
+                            pass
+        except Exception:
+            pass
+        status = (f"eleição {codigo}, " + f"{res['pst']:.2f}".replace(".", ",") + f"% das seções, "
+                  f"{len(res['por_uf'])} UFs, governador/senado/deputados em {len(res['estados'])} UFs")
+        registrar("Apuração oficial (TSE)", True, status)
+        return res
     except Exception as erro:
         registrar("Apuração oficial (TSE)", False, f"falhou ({str(erro)[:60]})")
         return None
@@ -820,7 +886,7 @@ def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticia
     pd.DataFrame(SEED_DF, columns=["cargo", "cenario", "instituto", "candidato", "campo", "pct"]).to_csv(SAIDA / "fato_df.csv", **op)
     pd.DataFrame(noticias or []).to_csv(SAIDA / "fato_noticias.csv", **op)
     if resultado:
-        linhas = [{"uf": "BR", **{k: v for k, v in resultado.items() if k != "por_uf"}}]
+        linhas = [{"uf": "BR", **{k: v for k, v in resultado.items() if k not in ("por_uf", "cands", "estados", "tse")}}]
         linhas += [{"uf": k, **v} for k, v in resultado["por_uf"].items()]
         pd.DataFrame(linhas).to_csv(SAIDA / "fato_apuracao_tse.csv", **op)
 
@@ -873,16 +939,49 @@ def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticia
     return destino
 
 
+def apuracao_ao_vivo(args) -> None:
+    """Grava apuracao.json na raiz do repositório; a página lê esse arquivo a cada ~1 minuto.
+    Deputados são listas grandes: só são relidos com --com-deputados; senão, mantém os da leitura anterior."""
+    destino = AQUI / "apuracao.json"
+    anterior = {}
+    if destino.exists():
+        try:
+            anterior = json.loads(destino.read_text(encoding="utf-8")).get("resultado") or {}
+        except Exception:
+            anterior = {}
+    res = extrair_resultado(False, args.codigo_eleicao or None, args.turno, args.codigo_estadual or None,
+                            deputados=args.com_deputados)
+    if not res:
+        print("[ao vivo] TSE sem dados ainda")
+        return
+    if not args.com_deputados:
+        for uf, ant in (anterior.get("estados") or {}).items():
+            for casa in ("dep_federal", "dep_estadual"):
+                if casa in ant:
+                    res["estados"].setdefault(uf, {})[casa] = ant[casa]
+    agora = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M")
+    destino.write_text(json.dumps({"atualizado": agora, "resultado": res}, ensure_ascii=False), encoding="utf-8")
+    print(f"[ao vivo] {agora}: {res['pst']:.2f}% das seções | Lula {res['lula_pct']}% x Flávio {res['flavio_pct']}%")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Pipeline diário das eleições 2026")
     ap.add_argument("--offline", action="store_true", help="não acessa a internet; usa só o snapshot")
     ap.add_argument("--codigo-eleicao", help="código da eleição no TSE (ex.: 619), se a descoberta automática falhar")
+    ap.add_argument("--codigo-estadual", help="código da eleição estadual no TSE (governador/senado), se a descoberta falhar")
     ap.add_argument("--turno", type=int, default=1, choices=[1, 2])
+    ap.add_argument("--so-apuracao", action="store_true",
+                    help="modo ao vivo: lê só a apuração do TSE e grava apuracao.json (usado no dia da eleição)")
+    ap.add_argument("--com-deputados", action="store_true", help="no modo ao vivo, relê também os deputados (mais lento)")
     args = ap.parse_args()
+
+    if args.so_apuracao:
+        apuracao_ao_vivo(args)
+        return
 
     eleitorado = extrair_eleitorado(args.offline)
     bruto = extrair_pesquisas(args.offline)
-    resultado = extrair_resultado(args.offline, args.codigo_eleicao, args.turno)
+    resultado = extrair_resultado(args.offline, args.codigo_eleicao, args.turno, args.codigo_estadual)
     noticias, criterio = classificar_noticias(extrair_noticias(args.offline))
     pesq, uf, gov, reg, seg, media = agregar(tratar(bruto), eleitorado)
     hist = tratar(extrair_historico(bruto[bruto["fonte"] == "snapshot"]))

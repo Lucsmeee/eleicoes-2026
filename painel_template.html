@@ -169,6 +169,39 @@ details.tabela table{border-collapse:collapse;width:100%;margin-top:8px;font-var
 details.tabela th,details.tabela td{text-align:left;padding:4px 6px;border-top:1px solid var(--line)}
 details.tabela td.n,details.tabela th.n{text-align:right}
 .tab-scroll{max-height:320px;overflow:auto}
+.guias{display:flex;gap:6px;margin:18px 0 0;border-bottom:1px solid var(--line)}
+.guias button{font:600 1.05rem "Barlow",sans-serif;padding:10px 18px;border:0;border-bottom:3px solid transparent;background:none;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+.guias button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.guias .vivo{display:inline-block;width:8px;height:8px;border-radius:50%;background:#C0392B;margin-left:6px;vertical-align:middle;animation:pisca 1.4s infinite}
+@keyframes pisca{50%{opacity:.25}}
+[hidden]{display:none!important}
+.ap-espera{text-align:center;padding:40px 20px}
+.ap-espera .num{font-size:clamp(2.6rem,9vw,4.4rem);line-height:1}
+.progresso{height:8px;border-radius:4px;background:var(--vazio);overflow:hidden;margin:6px 0 2px}
+.progresso i{display:block;height:100%;background:var(--ink)}
+table.comp{width:100%;border-collapse:collapse;font-size:.92rem}
+table.comp th,table.comp td{padding:7px 8px;border-top:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+table.comp th:first-child,table.comp td:first-child{text-align:left}
+table.comp th{color:var(--muted);font-weight:600;border-top:0}
+#ap-comp-uf{overflow-x:auto;max-height:none}
+.ok-sim{color:#2E7D4F;font-weight:600}.ok-nao{color:var(--empate);font-weight:600}
+.eleito{font:600 .75rem "Barlow",sans-serif;color:#2E7D4F;margin-left:6px}
+@media (prefers-reduced-motion:reduce){.guias .vivo{animation:none}}
+.ap-box{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 20px;border:2px solid var(--ink);border-radius:10px;background:var(--panel);padding:7px 14px;margin-bottom:12px}
+.ap-box-item{display:flex;align-items:center;flex-wrap:wrap;gap:4px 7px}
+.ap-box-num{font:700 1.2rem/1 "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums}
+.ap-box-rot{font:500 .85rem "Barlow",sans-serif;color:var(--muted)}
+.ap-box-sub{font-size:.75rem;color:var(--muted)}
+.ap-box .progresso{width:90px;height:5px;margin:0 0 0 4px}
+.dep-uf{display:flex;align-items:center;gap:10px;font-weight:600}
+.dep-uf select{font:500 1rem "Barlow",sans-serif;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.cand-dep{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:baseline;padding:6px 0;border-top:1px solid var(--line);font-size:.92rem}
+.cand-dep .pos{color:var(--muted);font-variant-numeric:tabular-nums}
+.cand-dep .vt{text-align:right;font-variant-numeric:tabular-nums}
+.dep-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:14px}
+.dep-col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.dep-tit{font-size:1.4rem;margin:0;padding-bottom:6px;border-bottom:2px solid var(--ink)}
+@media (max-width:760px){.dep-cols{grid-template-columns:minmax(0,1fr)}}
 footer{margin-top:48px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
 footer p{max-width:none}
 
@@ -186,8 +219,15 @@ footer p{max-width:none}
 
 <header>
   <p class="sub" id="contagem"></p>
-  <h1>Reta final das eleições 2026</h1>
-  <div id="apuracao"></div>
+  <h1>Eleições 2026</h1>
+  <nav class="guias" role="tablist" aria-label="Guias do painel">
+    <button role="tab" id="tab-pesquisas" data-guia="pesquisas" aria-controls="guia-pesquisas">Pesquisas</button>
+    <button role="tab" id="tab-apuracao" data-guia="apuracao" aria-controls="guia-apuracao">Apuração<span class="vivo" id="tab-vivo" hidden></span></button>
+  </nav>
+</header>
+
+<div id="guia-pesquisas" role="tabpanel" aria-labelledby="tab-pesquisas">
+<section style="margin-top:28px">
   <p class="sub">Média das pesquisas nacionais para presidente mais recentes, uma por instituto, votos totais.</p>
   <div class="cabo" id="cabo"></div>
   <div class="panel">
@@ -200,7 +240,7 @@ footer p{max-width:none}
     <h3>Cenário de 2º turno, Lula × Flávio</h3>
     <div id="seg2t"></div>
   </div>
-</header>
+</section>
 
 <section aria-labelledby="t-evo">
   <h2 id="t-evo">Evolução no tempo</h2>
@@ -312,6 +352,69 @@ footer p{max-width:none}
   <div class="panel fontes" style="margin-top:14px"><h3>Fontes nesta execução</h3><div id="fontes"></div></div>
 </section>
 
+</div>
+
+<div id="guia-apuracao" role="tabpanel" aria-labelledby="tab-apuracao" hidden>
+  <div class="panel ap-espera" id="ap-espera" style="margin-top:28px">
+    <p class="sub">A apuração oficial do TSE começa quando as urnas fecham</p>
+    <p class="num">Domingo, 4/10, 17h</p>
+    <p class="sub">horário de Brasília. A partir daí esta guia se atualiza sozinha, com os votos de presidente, governador, Senado e deputados em todos os estados.</p>
+  </div>
+  <div id="ap-conteudo" hidden>
+    <section style="margin-top:28px">
+      <div class="ap-box" role="status" aria-live="polite">
+        <div class="ap-box-item">
+          <span class="ap-box-num" id="ap-pst"></span><span class="ap-box-rot">das seções totalizadas</span>
+          <div class="progresso"><i id="ap-progresso"></i></div>
+        </div>
+        <div class="ap-box-item">
+          <span class="ap-box-rot">Atualizado às</span><span class="ap-box-num" id="ap-hora"></span>
+          <span class="ap-box-sub" id="ap-status"></span>
+        </div>
+      </div>
+      <div class="cabo" id="ap-placar"></div>
+      <div class="panel" style="margin-top:14px"><h3>Todos os candidatos a presidente</h3><div id="ap-cands"></div></div>
+    </section>
+    <section aria-labelledby="t-ap-uf">
+      <h2 id="t-ap-uf">Apuração por estado</h2>
+      <p class="sub">Cor pela vantagem de cada um no estado. Toque em um estado para comparar com o que as pesquisas previam.</p>
+      <div class="mapa-area">
+        <div><div class="grade" id="ap-grade"></div><div class="legenda" id="ap-legenda"></div></div>
+        <div><div class="placar" id="ap-placar-uf"></div><div class="panel detalhe" id="ap-detalhe"></div></div>
+      </div>
+    </section>
+    <section aria-labelledby="t-ap-comp">
+      <h2 id="t-ap-comp">Previsto × realizado</h2>
+      <p class="sub" id="ap-comp-sub"></p>
+      <div class="panel" id="ap-comp-br"></div>
+      <div class="panel tab-scroll" style="margin-top:14px" id="ap-comp-uf"></div>
+    </section>
+    <section aria-labelledby="t-ap-est" id="ap-est-sec">
+      <h2 id="t-ap-est">Governadores e Senado</h2>
+      <p class="sub">Cor pelo alinhamento de quem lidera a disputa para governador em cada estado. Toque em um estado para ver governador e as duas vagas do Senado.</p>
+      <div class="mapa-area">
+        <div><div class="grade" id="ap-gov-grade"></div><div class="legenda" id="ap-gov-legenda"></div></div>
+        <div><div class="placar" id="ap-gov-placar"></div><div class="panel detalhe" id="ap-est-detalhe"></div></div>
+      </div>
+    </section>
+    <section aria-labelledby="t-ap-dep" id="ap-dep-sec">
+      <h2 id="t-ap-dep">Deputados</h2>
+      <p class="sub">Eleição proporcional: as cadeiras são divididas entre partidos e federações pela soma dos votos, e só depois entre os candidatos mais votados de cada um. Por isso o painel mostra bancadas por partido além dos mais votados.</p>
+      <div class="abas" role="group" aria-label="Escolha a casa">
+        <button data-casa="dep_federal" aria-pressed="true">Câmara dos Deputados</button>
+        <button data-casa="dep_estadual" aria-pressed="false">Assembleias e Câmara Legislativa</button>
+      </div>
+      <div class="panel" id="ap-dep-nac" style="margin-bottom:14px"></div>
+      <div class="dep-uf"><label for="ap-dep-uf">Estado</label> <select id="ap-dep-uf"></select></div>
+      <div class="df-grid" style="margin-top:12px">
+        <div class="panel" id="ap-dep-partidos"></div>
+        <div class="panel" id="ap-dep-top"></div>
+      </div>
+      <p class="nota">Votos nominais somados por partido ou federação (sem os votos de legenda). Federações, como PT/PCdoB/PV, contam como um único partido na divisão das cadeiras e aparecem com os partidos que as compõem. A marca "eleito(a)" e as bancadas aparecem quando o TSE confirma, geralmente perto do fim da apuração de cada estado.</p>
+    </section>
+  </div>
+</div>
+
 <footer><p id="rodape"></p></footer>
 </main>
 
@@ -329,10 +432,6 @@ const T={L:"Lula",F:"Flávio",E:"Empate técnico",B:"Bolsonaro","?":"sem pesquis
 (function(){
   const dias=Math.ceil((new Date(D.eleicao)-new Date())/864e5);
   $("contagem").textContent=(dias>0?`Faltam ${dias} dias para o 1º turno, `:"")+`dados de ${D.atualizado}`;
-  const R=D.resultado;
-  if(R) $("apuracao").innerHTML=`<div class="banner"><h3>Apuração oficial do TSE, ${fmt(R.pst)}% das seções</h3>
-    <p><span class="num lula" style="font-size:2.6rem">${fmt(R.lula_pct)}%</span> &nbsp;×&nbsp; <span class="num flavio" style="font-size:2.6rem">${fmt(R.flavio_pct)}%</span><br>
-    <span class="sub">Lula × Flávio, votos válidos. ${milhoes(R.lula_votos)} × ${milhoes(R.flavio_votos)} votos.</span></p></div>`;
   const m=D.media, dif=Math.round((m.lula-m.flavio)*10)/10;
   $("cabo").setAttribute("aria-label",`Média nacional: Lula ${fmt(m.lula)}%, Flávio ${fmt(m.flavio)}%`);
   $("cabo").innerHTML=`<div class="cabo-nums"><div class="lula"><span class="num">${fmt(m.lula)}%</span><small>Lula (PT)</small></div>
@@ -566,8 +665,7 @@ const MODOS={
   p22:{rot:"Resultado 2022",v:u=>u.v22,cats:{L:["Lula venceu","var(--lula)"],B:["Bolsonaro venceu","var(--flavio)"]}},
   gov:{rot:"Governador 2026",v:u=>u.gov,cats:{L:["Aliado de Lula lidera","var(--lula)"],F:["Aliado de Flávio lidera","var(--flavio)"],E:["Empate técnico","var(--empate)"],N:["Fora das alianças","var(--neutro)"]}}
 };
-if(D.resultado&&D.resultado.por_uf) MODOS.apur={rot:"Apuração TSE",v:u=>{const r=D.resultado.por_uf[u.uf];return r?(r.lula_pct>r.flavio_pct?"L":"F"):"?"},cats:{L:["Lula à frente","var(--lula)"],F:["Flávio à frente","var(--flavio)"],"?":["Sem dado","var(--vazio)"]}};
-let modo=D.resultado?"apur":"p26",sel=null;
+let modo="p26",sel=null;
 $("abas").innerHTML=Object.entries(MODOS).map(([k,m])=>`<button data-modo="${k}">${m.rot}</button>`).join("");
 const maxSaldo=Math.max(...D.ufs.map(u=>Math.abs(u.saldo1||0)));
 function contar(m){const c={};D.ufs.forEach(u=>{const k=m.v(u);c[k]=(c[k]||0)+1});return c;}
@@ -678,6 +776,173 @@ render();
   $("df-gov-fonte").textContent=F.gov.fonte;barras("df-gov",F.gov.itens);$("df-gov-nota").textContent=F.gov.nota;
   $("df-sen-fonte").textContent=F.sen.fonte;barras("df-sen",F.sen.itens);$("df-sen-nota").textContent=F.sen.nota;
 })();
+
+
+// ===================== Guias =====================
+function abrirGuia(g){
+  ["pesquisas","apuracao"].forEach(x=>{$("guia-"+x).hidden=x!==g;$("tab-"+x).setAttribute("aria-selected",x===g);});
+  if(history.replaceState) history.replaceState(null,"","#"+g);
+}
+document.querySelectorAll(".guias button").forEach(b=>b.onclick=()=>abrirGuia(b.dataset.guia));
+
+// ===================== Apuração =====================
+let AP=D.resultado, apSel=null;
+const pct=v=>fmt((Math.round(v*100)/100).toFixed(2));
+const votos=v=>Number(v).toLocaleString("pt-BR");
+function renderApuracao(){
+  const R=AP; if(!R){$("ap-espera").hidden=false;$("ap-conteudo").hidden=true;
+    if(new Date()>=new Date("2026-10-04T17:00:00-03:00")) $("ap-espera").innerHTML=`<p class="sub">As urnas já fecharam</p><p class="num" style="font-size:clamp(1.8rem,6vw,2.6rem)">Aguardando os primeiros dados do TSE</p><p class="sub">O painel tenta de novo a cada 15 minutos (última tentativa: ${D.atualizado}). Enquanto isso, a apuração oficial está em resultados.tse.jus.br.</p>`;
+    return;}
+  $("ap-espera").hidden=true;$("ap-conteudo").hidden=false;$("tab-vivo").hidden=R.pst>=100;
+  $("ap-pst").textContent=`${pct(R.pst)}%`;
+  const hTSE=R.hora?String(R.hora).slice(0,5).replace(":","h"):"", hPainel=(String(D.atualizado).match(/(\d{1,2}h\d{2})/)||[])[1]||D.atualizado;
+  $("ap-hora").textContent=R.aoVivo&&hTSE?hTSE:(hPainel||hTSE);
+  $("ap-status").textContent=R.aoVivo?"(ao vivo, direto do TSE)":R.viaRepo?`(${hTSE?`TSE ${hTSE}, `:""}atualiza a cada ~1 min)`:`(${hTSE?`TSE ${hTSE}, `:""}atualiza a cada 15 min)`;
+  $("ap-progresso").style.width=Math.min(100,R.pst)+"%";
+  const dv=R.lula_votos-R.flavio_votos, lider=dv>=0?"Lula":"Flávio";
+  $("ap-placar").innerHTML=`<div class="cabo-nums"><div class="lula"><span class="num">${pct(R.lula_pct)}%</span><small>Lula (PT), ${votos(R.lula_votos)} votos</small></div>
+    <div class="flavio" style="text-align:right"><span class="num">${pct(R.flavio_pct)}%</span><small>Flávio Bolsonaro (PL), ${votos(R.flavio_votos)} votos</small></div></div>
+    <div class="barra"><i style="width:${R.lula_pct}%;background:var(--lula)"></i><i style="flex:1"></i><i style="width:${R.flavio_pct}%;background:var(--flavio)"></i><span class="meio"></span></div>
+    <p class="nota">Votos válidos. ${lider} à frente por ${votos(Math.abs(dv))} votos. A linha do meio marca 50%: quem passar dela com mais da metade dos válidos vence no 1º turno.</p>`;
+  const mx=Math.max(...(R.cands||[]).map(c=>c.pct),1);
+  $("ap-cands").innerHTML=(R.cands||[]).map(c=>{const cor=/LULA/i.test(c.nm)?"var(--lula)":/BOLSONARO/i.test(c.nm)?"var(--flavio)":"var(--neutro)";
+    return `<div class="bar-row"><span>${c.nm}${c.eleito?'<span class="eleito">eleito(a)</span>':""}</span><div class="bar-bg"><i style="width:${c.pct/mx*100}%;background:${cor}"></i></div><span class="v">${pct(c.pct)}%</span></div>`}).join("");
+  renderApMapa(); renderComparacao(); renderApEstados(); renderApDeputados();
+}
+function corUF(r){ if(!r) return ["var(--vazio)",true];
+  const d=r.lula_pct-r.flavio_pct, k=d>=0?"var(--lula)":"var(--flavio)", p=Math.round(25+75*Math.min(1,Math.abs(d)/40));
+  return [`color-mix(in srgb, ${k} ${p}%, var(--vazio))`,p<50]; }
+function renderApMapa(){
+  const R=AP,g=$("ap-grade");g.innerHTML="";let nl=0,nf=0;
+  D.ufs.forEach(u=>{const r=R.por_uf[u.uf],[c,claro]=corUF(r),b=document.createElement("button");
+    if(r){if(r.lula_pct>=r.flavio_pct)nl++;else nf++;}
+    b.className="uf"+(u.uf===apSel?" sel":"")+(claro?" claro":"");b.style.gridColumn=POS[u.uf][0]+1;b.style.gridRow=POS[u.uf][1]+1;b.style.background=c;
+    b.textContent=u.uf;b.setAttribute("aria-label",r?`${u.uf}: Lula ${pct(r.lula_pct)}%, Flávio ${pct(r.flavio_pct)}%`:`${u.uf}: sem dados`);
+    b.onclick=()=>{apSel=apSel===u.uf?null:u.uf;renderApMapa();};g.appendChild(b);});
+  $("ap-legenda").innerHTML=`<span><b style="background:var(--lula)"></b>Lula à frente</span><span><b style="background:var(--flavio)"></b>Flávio à frente</span><span><b style="background:var(--vazio)"></b>Sem dados ainda</span><span class="sub">cor mais forte = vantagem maior</span>`;
+  $("ap-placar-uf").innerHTML=`<div><span class="num lula">${nl}</span><br><small>UFs com Lula à frente</small></div><div><span class="num flavio">${nf}</span><br><small>UFs com Flávio à frente</small></div>`;
+  if(!apSel){$("ap-detalhe").innerHTML=`<h3>Brasil</h3><p>${pct(R.pst)}% das seções totalizadas no país.</p><p class="sub">Toque em um estado para ver a apuração dele e comparar com as pesquisas.</p>`;return;}
+  const u=U[apSel],r=R.por_uf[apSel];
+  let h=`<button class="voltar" onclick="apSel=null;renderApMapa()">← Ver Brasil inteiro</button><h3>${apSel}</h3>`;
+  if(!r){$("ap-detalhe").innerHTML=h+`<p class="sub">Ainda sem dados do TSE para este estado.</p>`;return;}
+  const real=r.lula_votos-r.flavio_votos;
+  h+=`<p><span class="num lula">${pct(r.lula_pct)}%</span> &nbsp;×&nbsp; <span class="num flavio">${pct(r.flavio_pct)}%</span><br><span class="sub">Lula × Flávio, válidos, ${pct(r.pst)}% das seções</span></p>`;
+  h+=`<p>Saldo real até agora: <b class="${real>=0?"lula":"flavio"}">${mi(real)} ${real>=0?"Lula":"Flávio"}</b>`;
+  if(u.saldo1!=null) h+=`<br>Saldo previsto pelas pesquisas: <b class="${u.saldo1>=0?"lula":"flavio"}">${mi(u.saldo1)} ${u.saldo1>=0?"Lula":"Flávio"}</b>`;
+  if(u.l1!=null) h+=`<br>Última pesquisa: Lula ${u.l1}% × Flávio ${u.f1}% (${u.fonte1}, votos totais)`;
+  $("ap-detalhe").innerHTML=h+`</p>`;
+}
+function renderComparacao(){
+  const R=AP,m=D.media,prev=m.lula/(m.lula+m.flavio)*100,real=R.lula_pct/(R.lula_pct+R.flavio_pct)*100,err=real-prev;
+  $("ap-comp-sub").textContent=R.pst<100?`Resultado parcial (${pct(R.pst)}% das seções): a comparação muda até o fim da apuração.`:"Resultado final do 1º turno contra o que as pesquisas indicavam.";
+  $("ap-comp-br").innerHTML=`<h3>Disputa entre os dois</h3>
+    <div class="duelo"><span>Pesquisas (média de ${m.n})</span><span><b class="lula">Lula ${pct(prev)}%</b> × <b class="flavio">${pct(100-prev)}% Flávio</b></span></div>
+    <div class="duelo"><span>Urnas</span><span><b class="lula">Lula ${pct(real)}%</b> × <b class="flavio">${pct(100-real)}% Flávio</b></span></div>
+    <p class="nota">Considera só os votos de Lula e Flávio, para comparar pesquisa (que tem indecisos) com urna na mesma base. As pesquisas ${Math.abs(err)<1?"acertaram a disputa com menos de 1 ponto de erro":`${err>0?"subestimaram Lula":"subestimaram Flávio"} em ${fmt(Math.abs(err).toFixed(1))} pontos`}.</p>`;
+  const linhas=D.ufs.filter(u=>R.por_uf[u.uf]&&u.saldo1!=null).map(u=>{const r=R.por_uf[u.uf];return {uf:u.uf,prev:u.saldo1,real:r.lula_votos-r.flavio_votos,lp:u.l26,pst:r.pst};}).sort((a,b)=>Math.abs(b.real)-Math.abs(a.real));
+  if(!linhas.length){$("ap-comp-uf").innerHTML=`<p class="sub">Aguardando dados por estado.</p>`;return;}
+  const decid=linhas.filter(x=>x.lp!=="E"), acertos=decid.filter(x=>(x.lp==="L")===(x.real>=0)).length;
+  const erroMed=linhas.reduce((a,x)=>a+Math.abs(x.real-x.prev),0)/linhas.length;
+  $("ap-comp-uf").innerHTML=`<h3>Saldo de votos por estado</h3><p class="sub">As pesquisas apontavam o líder certo em ${acertos} de ${decid.length} estados onde havia um favorito. Erro médio do saldo previsto: ${milhoes(erroMed)}.</p>
+    <table class="comp"><thead><tr><th>UF</th><th>Previsto</th><th>Real</th><th>Apurado</th><th>Líder</th></tr></thead><tbody>${linhas.map(x=>`<tr><td><b>${x.uf}</b></td>
+    <td class="${x.prev>=0?"lula":"flavio"}">${mi(x.prev)}</td><td class="${x.real>=0?"lula":"flavio"}">${mi(x.real)}</td><td>${pct(x.pst)}%</td>
+    <td>${x.lp==="E"?'<span class="sub">empate previsto</span>':((x.lp==="L")===(x.real>=0)?'<span class="ok-sim">acertou</span>':'<span class="ok-nao">errou</span>')}</td></tr>`).join("")}</tbody></table>`;
+}
+const semAcento=s=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+const GENERICOS=["professora","professor","delegado","delegada","doutor","doutora","coronel","capitao","pastor","senador","deputado"];
+function campoDe(uf,nm){ // casa o nome da urna com a lista de candidatos alinhados (por sobrenome/apelido)
+  const tk=semAcento(nm).split(/[\s.]+/).filter(w=>w.length>=4&&!GENERICOS.includes(w));
+  const g=D.gov.find(x=>x[0]===uf&&semAcento(x[1]).split(/[\s.]+/).some(w=>tk.includes(w)));
+  return g?g[3]:"N";
+}
+let estSel="DF";
+function renderApEstados(){
+  const E=AP.estados||{}, com=Object.keys(E).filter(u=>E[u].governador&&E[u].governador.cands.length);
+  $("ap-est-sec").hidden=!Object.keys(E).length; if(!Object.keys(E).length) return;
+  const cor={L:"var(--lula)",F:"var(--flavio)",N:"var(--neutro)"}, cont={L:0,F:0,N:0}; let eleitos=0;
+  const g=$("ap-gov-grade"); g.innerHTML="";
+  D.ufs.forEach(u=>{const x=E[u.uf]&&E[u.uf].governador,b=document.createElement("button");let c="var(--vazio)",claro=true,rot="sem dados";
+    if(x&&x.cands.length){const k=campoDe(u.uf,x.cands[0].nm);cont[k]++;if(x.cands[0].eleito)eleitos++;c=cor[k];claro=false;rot=`${x.cands[0].nm} à frente`;}
+    b.className="uf"+(u.uf===estSel?" sel":"")+(claro?" claro":"");b.style.gridColumn=POS[u.uf][0]+1;b.style.gridRow=POS[u.uf][1]+1;b.style.background=c;
+    b.textContent=u.uf;b.setAttribute("aria-label",`${u.uf}: ${rot}`);b.onclick=()=>{estSel=u.uf;renderApEstados();};g.appendChild(b);});
+  $("ap-gov-legenda").innerHTML=`<span><b style="background:var(--lula)"></b>Aliado de Lula à frente</span><span><b style="background:var(--flavio)"></b>Aliado de Flávio à frente</span><span><b style="background:var(--neutro)"></b>Fora das alianças</span><span><b style="background:var(--vazio)"></b>Sem dados ainda</span>`;
+  $("ap-gov-placar").innerHTML=`<div><span class="num lula">${cont.L}</span><br><small>Aliados de Lula à frente</small></div><div><span class="num flavio">${cont.F}</span><br><small>Aliados de Flávio à frente</small></div><div><span class="num">${eleitos}</span><br><small>Governadores já eleitos</small></div>`;
+  const s=E[estSel]||{};
+  const bloco=(x,tit,nota)=>{if(!x||!x.cands.length) return `<h3 style="margin-top:14px">${tit}</h3><p class="sub">Sem dados ainda.</p>`;
+    const mx=Math.max(...x.cands.map(c=>c.pct),1);
+    return `<h3 style="margin-top:14px">${tit} <span class="tag">${pct(x.pst)}% das seções</span></h3>`+x.cands.map((c,i)=>{const k=campoDe(estSel,c.nm);
+      return `<div class="bar-row"><span>${c.nm}${c.eleito?'<span class="eleito">eleito(a)</span>':""}</span><div class="bar-bg"><i style="width:${c.pct/mx*100}%;background:${tit==="Governador"?cor[k]:"var(--neutro)"}"></i></div><span class="v">${pct(c.pct)}%</span></div>`}).join("")+(nota?`<p class="nota">${nota}</p>`:"");};
+  $("ap-est-detalhe").innerHTML=`<h3>${estSel}</h3>`+bloco(s.governador,"Governador","Vence no 1º turno quem tiver mais da metade dos votos válidos; senão, os dois primeiros vão ao 2º turno em 25/10.")+
+    bloco(s.senador,"Senado","São duas vagas: os dois mais votados são eleitos, sem 2º turno.");
+}
+
+let casa="dep_federal", depUF="DF";
+const CORES_P=["#5B6B7C","#7A8B5C","#8C6A4F","#6A5C8C","#4F7F8C","#8C4F6A","#7C7C5B","#5C7A6A"];
+function corPartido(pn){ if(/(^|\/)PT(\/|$)|FE BRASIL|BRASIL DA ESPERAN/i.test(pn)) return "var(--lula)"; if(/(^|\/)PL(\/|$)/i.test(pn)) return "var(--flavio)";
+  let h=0;for(const ch of pn)h=(h*31+ch.charCodeAt(0))%997;return CORES_P[h%CORES_P.length]; }
+function barrasPartidos(lista,campo,max){ const mx=Math.max(...lista.map(x=>x[campo]),1);
+  return lista.slice(0,max).map(x=>`<div class="bar-row"><span>${x.p}</span><div class="bar-bg"><i style="width:${x[campo]/mx*100}%;background:${corPartido(x.p)}"></i></div><span class="v">${campo==="eleitos"?x.eleitos:pct(x.pct)+"%"}</span></div>`).join(""); }
+function renderApDeputados(){
+  const E=AP.estados||{}, tem=Object.keys(E).some(u=>E[u].dep_federal||E[u].dep_estadual);
+  $("ap-dep-sec").hidden=!tem; if(!tem) return;
+  document.querySelectorAll("[data-casa]").forEach(b=>{b.setAttribute("aria-pressed",b.dataset.casa===casa);b.onclick=()=>{casa=b.dataset.casa;renderApDeputados();};});
+  const sel=$("ap-dep-uf"); if(!sel.options||!sel.options.length){sel.innerHTML=D.ufs.map(u=>`<option value="${u.uf}"${u.uf===depUF?" selected":""}>${u.uf}</option>`).join("");sel.onchange=()=>{depUF=sel.value;renderApDeputados();};}
+  const soma={}; let eleitos=0, ufsCom=0;
+  Object.values(E).forEach(e=>{const d=e[casa]; if(!d) return; ufsCom++; d.partidos.forEach(x=>{const y=soma[x.p]=soma[x.p]||{p:x.p,eleitos:0,votos:0};y.eleitos+=x.eleitos;y.votos+=x.votos;eleitos+=x.eleitos;});});
+  const lista=Object.values(soma).sort((a,b)=>b.eleitos-a.eleitos||b.votos-a.votos), tot=lista.reduce((a,x)=>a+x.votos,0)||1; lista.forEach(x=>x.pct=x.votos/tot*100);
+  const nomeCasa=casa==="dep_federal"?"Câmara dos Deputados":"assembleias estaduais e Câmara Legislativa do DF";
+  $("ap-dep-nac").innerHTML=eleitos?`<h3>Bancadas eleitas: ${nomeCasa} <span class="tag">${eleitos} confirmados pelo TSE</span></h3>${barrasPartidos(lista,"eleitos",15)}`
+    :`<h3>Votos por partido: ${nomeCasa} <span class="tag">${ufsCom} UFs com dados</span></h3>${barrasPartidos(lista,"pct",12)}<p class="nota">As bancadas aparecem aqui quando o TSE começar a confirmar os eleitos.</p>`;
+  const d=(E[depUF]||{})[casa], rot=casa==="dep_federal"?"Deputado federal":(depUF==="DF"?"Deputado distrital":"Deputado estadual");
+  if(!d){$("ap-dep-partidos").innerHTML=`<h3>${rot}, ${depUF}</h3><p class="sub">Sem dados ainda.</p>`;$("ap-dep-top").innerHTML="";return;}
+  $("ap-dep-partidos").innerHTML=`<h3>${rot}, ${depUF} <span class="tag">${pct(d.pst)}% das seções</span></h3>`+
+    (d.eleitos_total?`<p class="sub">Bancada eleita (${d.eleitos_total} cadeiras confirmadas)</p>${barrasPartidos(d.partidos.filter(x=>x.eleitos),"eleitos",15)}<p class="sub" style="margin-top:10px">Votos por partido</p>`:`<p class="sub">Votos por partido</p>`)+barrasPartidos(d.partidos,"pct",10);
+  $("ap-dep-top").innerHTML=`<h3>Mais votados</h3>`+d.top.map((c,i)=>`<div class="cand-dep"><span class="pos">${i+1}</span><span>${c.nm} <span class="sub">${c.partido}</span>${c.eleito?'<span class="eleito">eleito(a)</span>':""}</span><span class="vt">${votos(c.votos)}</span></div>`).join("");
+}
+// Ao vivo: o navegador tenta ler o TSE direto a cada 30 segundos (se o TSE bloquear, fica com o dado do painel)
+async function lerTSE(cod,uf,cargo){
+  const c6=String(cod).padStart(6,"0"),r=await fetch(`${AP.tse.base}/ele2026/${cod}/dados-simplificados/${uf}/${uf}-c${String(cargo).padStart(4,"0")}-e${c6}-r.json`,{cache:"no-store"});
+  if(!r.ok) throw new Error(r.status);const j=await r.json(),n=v=>parseFloat(String(v||"0").replace(",","."));
+  const cands=(j.cand||[]).map(c=>({nm:String(c.nm||"").toLowerCase().split(/\s+/).map(w=>["da","de","do","das","dos","e"].includes(w)?w:w.charAt(0).toUpperCase()+w.slice(1)).join(" "),votos:+c.vap||0,pct:n(c.pvap),eleito:String(c.e||"").toLowerCase()==="s"})).sort((a,b)=>b.votos-a.votos);
+  return {pst:n(j.pst),hora:j.hg||"",cands};
+}
+function lf(c){const l=c.find(x=>/LULA/i.test(x.nm)),f=c.find(x=>/BOLSONARO/i.test(x.nm));return l&&f?{lula_pct:l.pct,flavio_pct:f.pct,lula_votos:l.votos,flavio_votos:f.votos}:null;}
+let ciclos=0;
+async function aoVivo(){
+  if(!AP||!AP.tse||AP.pst>=100) return;
+  try{
+    const br=await lerTSE(AP.tse.federal,"br",1),x=lf(br.cands);if(!x) throw new Error("sem candidatos");
+    Object.assign(AP,x,{pst:br.pst,hora:br.hora,cands:br.cands.slice(0,10),aoVivo:true});
+    if(ciclos%5===0){ for(const u of D.ufs){try{const r=await lerTSE(AP.tse.federal,u.uf.toLowerCase(),1),y=lf(r.cands);if(y)AP.por_uf[u.uf]={pst:r.pst,...y};}catch(e){} }
+      if(AP.tse.estadual){AP.estados=AP.estados||{};for(const u of D.ufs){for(const [k,cg] of [["governador",3],["senador",5]]){try{const r=await lerTSE(AP.tse.estadual,u.uf.toLowerCase(),cg);(AP.estados[u.uf]=AP.estados[u.uf]||{})[k]={pst:r.pst,cands:r.cands.slice(0,8)};}catch(e){}}}}}
+    ciclos++;renderApuracao();setTimeout(aoVivo,30000);
+  }catch(e){ /* TSE bloqueou o acesso direto: segue com o dado do painel */ }
+}
+
+// Ao vivo pelo repositório: no dia da votação um workflow grava apuracao.json a cada ~1 min;
+// a página lê esse arquivo pela API do GitHub (limite de 60 leituras/hora por pessoa, por isso a cada 75 s).
+let tseIniciado=false, guiaAuto=!location.hash;
+async function aoVivoRepo(){
+  const h=location.hostname, repo=location.pathname.split("/").filter(Boolean)[0];
+  if(!h.endsWith("github.io")||!repo) return;
+  if(new Date()<new Date("2026-10-04T16:55:00-03:00")){setTimeout(aoVivoRepo,600000);return;}
+  try{
+    const r=await fetch(`https://api.github.com/repos/${h.split(".")[0]}/${repo}/contents/apuracao.json?ref=main`,{headers:{Accept:"application/vnd.github.raw+json"},cache:"no-store"});
+    if(r.status===403||r.status===429){setTimeout(aoVivoRepo,300000);return;}
+    if(r.ok){const j=await r.json(),R=j.resultado;
+      if(R&&(!AP||R.pst>AP.pst||(R.pst===AP.pst&&!AP.aoVivo))){
+        const primeiro=!AP; AP=Object.assign(R,{viaRepo:true}); if(j.atualizado) D.atualizado=j.atualizado; renderApuracao();
+        if(primeiro&&guiaAuto) abrirGuia("apuracao");
+        if(!tseIniciado&&AP.tse){tseIniciado=true;aoVivo();}
+      }}
+  }catch(e){}
+  setTimeout(aoVivoRepo,75000);
+}
+
+renderApuracao();
+abrirGuia(location.hash==="#pesquisas"?"pesquisas":location.hash==="#apuracao"?"apuracao":(AP?"apuracao":"pesquisas"));
+if(AP&&AP.tse){tseIniciado=true;aoVivo();}
+aoVivoRepo();
 
 // Fontes
 $("fontes").innerHTML=D.fontes.map(f=>`<div><span>${f.nome}</span><span class="${f.ok?"ok":"falhou"}">${f.status}</span></div>`).join("");
