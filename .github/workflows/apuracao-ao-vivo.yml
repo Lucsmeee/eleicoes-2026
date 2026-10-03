@@ -1,0 +1,51 @@
+name: Apuração ao vivo
+
+# No dia da votação, fica rodando das 17h às ~22h45 (Brasília): a cada ~1 minuto lê o TSE e grava
+# apuracao.json no repositório. A página publicada lê esse arquivo sozinha, sem esperar o deploy de 15 min.
+on:
+  schedule:
+    - cron: "0 20 4,25 10 *"   # 17h00 de Brasília em 4/10 e 25/10 (o GitHub pode atrasar alguns minutos)
+  workflow_dispatch:           # botão "Run workflow" para iniciar manualmente
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apuracao-ao-vivo
+  cancel-in-progress: false
+
+jobs:
+  ao-vivo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Ler o TSE a cada ~1 minuto por até 5h45
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          ARGS="--turno ${{ vars.TURNO || '1' }}"
+          if [ -n "${{ vars.CODIGO_ELEICAO }}" ]; then ARGS="$ARGS --codigo-eleicao ${{ vars.CODIGO_ELEICAO }}"; fi
+          if [ -n "${{ vars.CODIGO_ESTADUAL }}" ]; then ARGS="$ARGS --codigo-estadual ${{ vars.CODIGO_ESTADUAL }}"; fi
+          FIM=$(( $(date +%s) + 345*60 )); i=0
+          while [ "$(date +%s)" -lt "$FIM" ]; do
+            DEP=""; if [ $((i % 5)) -eq 0 ]; then DEP="--com-deputados"; fi   # deputados a cada ~5 ciclos
+            python pipeline_eleicoes_2026.py --so-apuracao $ARGS $DEP || true
+            if [ -f apuracao.json ]; then
+              git add apuracao.json
+              if ! git diff --cached --quiet; then
+                git commit -q -m "Apuração ao vivo" || true
+                for t in 1 2 3; do git pull -q --rebase -X ours && git push -q && break; sleep 5; done
+              fi
+            fi
+            i=$((i+1))
+            sleep 40
+          done

@@ -44,6 +44,7 @@ jobs:
         run: |
           ARGS="--turno ${{ vars.TURNO || '1' }}"
           if [ -n "${{ vars.CODIGO_ELEICAO }}" ]; then ARGS="$ARGS --codigo-eleicao ${{ vars.CODIGO_ELEICAO }}"; fi
+          if [ -n "${{ vars.CODIGO_ESTADUAL }}" ]; then ARGS="$ARGS --codigo-estadual ${{ vars.CODIGO_ESTADUAL }}"; fi
           python pipeline_eleicoes_2026.py $ARGS
 
       - name: Montar site
@@ -57,7 +58,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add cache/ 2>/dev/null || true
-          git diff --cached --quiet || (git commit -m "Cache do eleitorado TSE" && git push)
+          git diff --cached --quiet || (git commit -m "Cache do eleitorado TSE" && git pull --rebase && git push)
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
