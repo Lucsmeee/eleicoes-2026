@@ -67,17 +67,18 @@ UFS = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "
 DATA_SNAPSHOT = "03/10/2026"
 
 SEED_NACIONAL = [
-    # instituto, data_fim, lula, flavio, margem, base  (AtlasIntel em votos válidos)
+    # instituto, data_fim, lula, flavio, margem, base  (AtlasIntel quase sem indecisos: fica fora da média)
+    ("PoderData",           "2026-10-02", 42.0, 41.0, 1.5,  "total"),
+    ("CNT/MDA",             "2026-10-02", 43.1, 38.0, 2.2,  "total"),
+    ("Datafolha",           "2026-10-01", 42.0, 38.0, 2.0,  "total"),
+    ("Real Time Big Data",  "2026-09-30", 43.0, 39.0, 2.0,  "total"),
     ("Indexa",              "2026-09-29", 39.0, 34.0, 2.2,  "total"),
     ("Vox Brasil",          "2026-09-28", 41.1, 37.8, 2.15, "total"),
     ("Ideia",               "2026-09-28", 39.4, 38.4, 2.2,  "total"),
-    ("AtlasIntel",          "2026-09-28", 46.2, 43.1, 1.0,  "validos"),
+    ("AtlasIntel",          "2026-09-28", 45.3, 42.2, 1.0,  "baixo_indeciso"),
     ("Quaest",              "2026-09-27", 39.0, 34.0, 2.0,  "total"),
     ("Nexus/BTG",           "2026-09-27", 42.0, 37.0, 2.0,  "total"),
-    ("Datafolha",           "2026-10-01", 42.0, 38.0, 2.0,  "total"),
-    ("PoderData",           "2026-09-23", 41.0, 39.0, 1.8,  "total"),
-    ("Real Time Big Data",  "2026-09-30", 43.0, 39.0, 2.0,  "total"),
-    ("CNT/MDA",             "2026-10-02", 43.1, 38.0, 2.2,  "total"),
+    ("Datafolha",           "2026-09-23", 40.0, 36.0, 2.0,  "total"),
 ]
 
 # uf, regiao, vencedor_2t_2022 (L/B), lider_1t_2026 (L/F/E), lula_1t, flavio_1t,
@@ -156,75 +157,19 @@ ELEITORES_EXTERIOR = 918_876     # TSE 2026; votam só para presidente
 COMPARECIMENTO = 0.794            # premissa: comparecimento nacional do 2º turno de 2022
 
 
-# Aprovação do governo Lula (aprova × desaprova), para o gráfico de evolução.
-# instituto, data_fim, aprova, desaprova. Só a pergunta "aprova/desaprova" (não "ótimo/bom").
-# Acrescente uma linha quando sair rodada nova.
-SEED_APROVACAO = [
-    ("Quaest", "2026-01-11", 47, 49),
-    ("AtlasIntel", "2026-01-20", 48.7, 50.7), ("AtlasIntel", "2026-02-24", 46.6, 51.5),
-    ("Datafolha", "2026-03-05", 47, 49), ("Datafolha", "2026-04-09", 45, 51),
-    ("Quaest", "2026-04-13", 43, 52), ("Quaest", "2026-05-11", 46, 49),
-    ("AtlasIntel", "2026-05-18", 47.4, 51.3), ("Quaest", "2026-06-08", 48, 47),
-    ("Datafolha", "2026-06-18", 48, 49), ("AtlasIntel", "2026-06-30", 45.9, 52.3),
-    ("Quaest", "2026-07-13", 48, 47), ("Datafolha", "2026-07-23", 49, 48),
-    ("AtlasIntel", "2026-07-27", 47.6, 51.2), ("Quaest", "2026-08-13", 46, 48),
-    ("AtlasIntel", "2026-08-30", 45.4, 52.9), ("Quaest", "2026-09-01", 45, 48),
-    ("Quaest", "2026-09-06", 43, 50), ("Datafolha", "2026-09-10", 47, 50),
-    ("Quaest", "2026-09-13", 43, 50), ("Datafolha", "2026-09-16", 48, 50),
-    ("AtlasIntel", "2026-09-16", 45.4, 53.6), ("Quaest", "2026-09-20", 44, 50),
-    ("Datafolha", "2026-09-24", 47, 50), ("Quaest", "2026-09-27", 46, 49),
-    ("AtlasIntel", "2026-09-28", 45.2, 53.6), ("Indexa", "2026-09-29", 46, 51),
-    ("Datafolha", "2026-10-01", 48, 49),
-]
-# Rejeição ("não votaria de jeito nenhum"): instituto, data_fim, lula, flavio.
-# Cada instituto pergunta de um jeito (a Quaest só conta quem conhece o candidato), então o gráfico mostra uma linha
-# por instituto em vez de misturar. Institutos com uma rodada só aparecem como ponto.
-SEED_REJEICAO = [
-    ("Datafolha", "2026-05-13", 47, 43), ("Datafolha", "2026-05-21", 45, 46),
-    ("Quaest", "2026-06-08", 53, 56), ("Quaest", "2026-08-03", 52, 54),
-    ("Datafolha", "2026-08-20", 45, 46), ("Datafolha", "2026-09-10", 46, 46),
-    ("Quaest", "2026-09-13", 55, 55), ("Datafolha", "2026-09-16", 47, 47),
-    ("Quaest", "2026-09-20", 55, 56), ("Datafolha", "2026-09-24", 45, 45),
-    ("Quaest", "2026-09-27", 55, 56), ("Nexus", "2026-09-27", 48, 51),
-    ("Datafolha", "2026-10-01", 45, 45),
-]
-
-# Fatos da campanha marcados nos gráficos (ao clicar num dia, o painel lista os fatos das 3 semanas anteriores).
-# data, candidato afetado (L, F ou N = os dois / contexto), título curto, detalhe, fonte
-EVENTOS = [
-    ("2025-12-05", "F", "Bolsonaro anuncia Flávio como candidato do PL", "Início da pré-candidatura; Flávio herda o eleitorado do pai.", "Gazeta do Povo"),
-    ("2026-01-01", "L", "Começa a valer a isenção do IR até R$ 5 mil", "Principal medida econômica do governo; em abril, 49% dos beneficiados diziam não sentir diferença (Quaest).", "Quaest"),
-    ("2026-03-30", "N", "PSD lança Ronaldo Caiado", "Mais um nome na direita disputando o voto anti-Lula.", "Wikipédia"),
-    ("2026-04-13", "L", "Alta dos alimentos pesa na avaliação", "Quaest: 72% notam preços maiores (eram 59%) e 48% veem mais notícias negativas do governo.", "Quaest"),
-    ("2026-05-13", "F", "Áudios de Flávio com Vorcaro", "The Intercept revela negociação com o banqueiro preso sobre o filme Dark Horse.", "Agência Pública"),
-    ("2026-05-27", "L", "Câmara aprova fim da escala 6x1", "PEC aprovada em dois turnos; medida popular, citada pela Quaest como trunfo de Lula.", "Agência Brasil"),
-    ("2026-06-16", "F", "Eduardo Bolsonaro fica inelegível", "Condenação no caso da trama golpista; inelegível por 12 anos.", "Wikipédia"),
-    ("2026-08-05", "F", "Flávio anuncia Alfredo Gaspar como vice", "Fecha a chapa do PL.", "Gazeta do Povo"),
-    ("2026-08-16", "N", "Começa a campanha oficial", "Liberada a propaganda eleitoral nas ruas e na internet.", "TSE"),
-    ("2026-08-23", "N", "1º debate, sem Lula e Flávio", "Caiado, Renan Santos e Cury debatem em São Paulo.", "Wikipédia"),
-    ("2026-08-28", "N", "Começa o horário eleitoral no rádio e na TV", "Lula tem o maior tempo de TV.", "TRE-SC"),
-    ("2026-09-01", "N", "Crise no STF: mensagens de Moraes com Vorcaro", "Escândalo do Banco Master chega ao Supremo e domina o noticiário.", "Wikipédia"),
-    ("2026-09-11", "F", "TSE torna Pablo Marçal inelegível", "PRTB troca o candidato; parte do voto de Marçal fica livre.", "Wikipédia"),
-    ("2026-09-25", "L", "Lula lança o Desenrola 3.0", "Renegociação de até R$ 150 bilhões em dívidas das famílias.", "Imirante"),
-    ("2026-09-30", "F", "Marçal anuncia apoio a Flávio", "Soma um nome com alcance nas redes a quatro dias da eleição.", "CNN Brasil"),
-    ("2026-10-01", "N", "Globo cancela o último debate", "Flávio desiste horas antes, após o TSE vetar púlpito vazio para Lula; a emissora cita insegurança jurídica.", "Poder360"),
-    ("2026-10-01", "L", "Lula vai ao Flow no horário do debate", "A entrevista passa de 10 milhões de acessos em 12 horas, com pico de 1,7 milhão de pessoas ao vivo.", "Revista Fórum"),
-]
-
-JANELA_APROVACAO = 30   # aprovação sai com menos frequência: média da última rodada de cada instituto em 30 dias
-
 # Simulações nacionais de 2º turno (instituto, data_fim, lula, flavio, margem)
 SEED_2T_NACIONAL = [
+    ("CNT/MDA", "2026-10-02", 47.3, 43.1, 2.2),
+    ("Datafolha", "2026-10-01", 48.0, 45.0, 2.0),
+    ("Real Time Big Data", "2026-09-30", 45.0, 46.0, 2.0),
     ("Indexa", "2026-09-29", 43.0, 42.0, 2.2),
     ("Vox Brasil", "2026-09-28", 44.7, 45.2, 2.15),
     ("Ideia", "2026-09-28", 48.5, 48.0, 2.2),
-    ("AtlasIntel", "2026-09-28", 50.0, 50.0, 1.0),   # votos válidos
+    ("AtlasIntel", "2026-09-28", 47.6, 47.7, 1.0),
     ("Quaest", "2026-09-27", 42.0, 42.0, 2.0),
     ("Nexus/BTG", "2026-09-27", 46.0, 44.0, 2.0),
+    ("Datafolha", "2026-09-24", 47.0, 45.0, 2.0),
     ("PoderData", "2026-09-23", 46.0, 45.0, 1.8),
-    ("Datafolha", "2026-10-01", 48.0, 45.0, 2.0),
-    ("Real Time Big Data", "2026-09-30", 45.0, 46.0, 2.0),
-    ("CNT/MDA", "2026-10-02", 47.3, 43.1, 2.2),
 ]
 
 SEED_DF = [
@@ -334,7 +279,106 @@ NOTICIAS_SNAPSHOT = [
 ]
 MODELO_CLAUDE = "claude-haiku-4-5-20251001"
 
-RODAPE = ("Fontes: Datafolha, Quaest, AtlasIntel, Nexus/BTG, Real Time Big Data, Veritá, Indexa/Broadcast, Meio/Ideia, CNT/MDA, Correio Braziliense/Opinião, "
+# ---------------------------------------------------------------------------
+# MODO PÚBLICO (Res. TSE 23.600/2019, art. 10): toda pesquisa divulgada precisa mostrar período, margem de erro,
+# nível de confiança, nº de entrevistas, quem fez, quem contratou e o nº de registro no TSE.
+# Com PUBLICO = True, o painel só mostra (e só usa na média) pesquisas que têm ficha completa abaixo, e esconde
+# as seções baseadas em pesquisas estaduais até que elas também tenham ficha.
+# ---------------------------------------------------------------------------
+PUBLICO = False
+NOME_SAIDA = "painel_eleicoes_2026.html"
+
+# (instituto, data_fim) -> ficha. Fonte das fichas: matérias que reproduzem o registro (Gazeta do Povo, TVT, GMC).
+FICHAS = {
+    ("PoderData", "2026-10-02"): {"registro": "BR-03519/2026", "periodo": "30/9 a 2/10/2026", "entrevistas": 4000,
+                                  "margem": "±1,5 p.p.", "confianca": "95%", "realizou": "PoderData",
+                                  "contratou": "Poder360 (recursos próprios)"},
+    ("CNT/MDA", "2026-10-02"): {"registro": "BR-04756/2026", "periodo": "30/9 a 2/10/2026", "entrevistas": 2007,
+                                "margem": "±2,2 p.p.", "confianca": "95%", "realizou": "Instituto MDA",
+                                "contratou": "Confederação Nacional do Transporte (CNT)"},
+    ("Datafolha", "2026-10-01"): {"registro": "BR-08039/2026", "periodo": "28/9 a 1º/10/2026", "entrevistas": 2506,
+                                  "margem": "±2 p.p.", "confianca": "95%", "realizou": "Datafolha",
+                                  "contratou": "Folha de S.Paulo e Grupo Globo"},
+    ("Datafolha", "2026-09-24"): {"registro": "BR-00304/2026", "periodo": "22 a 24/9/2026", "entrevistas": 2002,
+                                  "margem": "±2 p.p.", "confianca": "95%", "realizou": "Datafolha",
+                                  "contratou": "Folha de S.Paulo e Grupo Globo"},
+    ("Datafolha", "2026-09-16"): {"registro": "BR-04029/2026", "periodo": "15 a 16/9/2026", "entrevistas": 2002,
+                                  "margem": "±2 p.p.", "confianca": "95%", "realizou": "Datafolha",
+                                  "contratou": "Empresa Folha da Manhã S.A. e Globo Comunicação e Participações S.A."},
+    ("Datafolha", "2026-09-10"): {"registro": "BR-01833/2026", "periodo": "8 a 10/9/2026", "entrevistas": 2002,
+                                  "margem": "±2 p.p.", "confianca": "95%", "realizou": "Datafolha",
+                                  "contratou": "Empresa Folha da Manhã S.A. e Globo Comunicação e Participações S.A."},
+    ("Quaest", "2026-09-27"): {"registro": "BR-06520/2026", "periodo": "24 a 27/9/2026", "entrevistas": 2004,
+                               "margem": "±2 p.p.", "confianca": "95%", "realizou": "Quaest",
+                               "contratou": "TV Globo e O Globo"},
+    ("AtlasIntel", "2026-09-28"): {"registro": "BR-04391/2026", "periodo": "23 a 28/9/2026", "entrevistas": 5005,
+                                   "margem": "±1 p.p.", "confianca": "95%", "realizou": "AtlasIntel",
+                                   "contratou": "recursos próprios (divulgação em parceria com a Bloomberg)"},
+}
+
+# 1º turno, votos totais, todos os candidatos que pontuaram: (instituto, data_fim) -> {candidato: %}
+CANDIDATOS_1T = {
+    ("Datafolha", "2026-10-01"): {"Lula (PT)": 42, "Flávio Bolsonaro (PL)": 38, "Augusto Cury (Avante)": 4,
+                                  "Ronaldo Caiado (PSD)": 3, "Renan Santos (Missão)": 3, "Romeu Zema (Novo)": 1,
+                                  "Samara Martins (UP)": 1, "Wilson Grassi (Democrata)": 1,
+                                  "Brancos e nulos": 5, "Indecisos": 2},
+    ("Quaest", "2026-09-27"): {"Lula (PT)": 39, "Flávio Bolsonaro (PL)": 34, "Augusto Cury (Avante)": 4,
+                               "Ronaldo Caiado (PSD)": 4, "Renan Santos (Missão)": 3, "Romeu Zema (Novo)": 1},
+    ("AtlasIntel", "2026-09-28"): {"Lula (PT)": 45.3, "Flávio Bolsonaro (PL)": 42.2, "Renan Santos (Missão)": 5.2,
+                                   "Augusto Cury (Avante)": 2.0, "Ronaldo Caiado (PSD)": 1.8, "Romeu Zema (Novo)": 0.9,
+                                   "Samara Martins (UP)": 0.4, "Rui Costa Pimenta (PCO)": 0.1,
+                                   "Brancos e nulos": 0.9, "Indecisos": 1.2},
+}
+
+# Cenários de 2º turno com outros adversários: (instituto, data_fim, adversário, % Lula, % adversário)
+CENARIOS_2T = [
+    ("CNT/MDA", "2026-10-02", "Flávio Bolsonaro (PL)", 47.3, 43.1),
+    ("CNT/MDA", "2026-10-02", "Augusto Cury (Avante)", 46.8, 37.9),
+    ("CNT/MDA", "2026-10-02", "Ronaldo Caiado (PSD)", 47.0, 37.3),
+    ("Datafolha", "2026-10-01", "Flávio Bolsonaro (PL)", 48, 45),
+    ("Datafolha", "2026-10-01", "Augusto Cury (Avante)", 47, 42),
+    ("Datafolha", "2026-10-01", "Ronaldo Caiado (PSD)", 48, 42),
+    ("Datafolha", "2026-10-01", "Romeu Zema (Novo)", 49, 40),
+    ("Datafolha", "2026-10-01", "Renan Santos (Missão)", 48, 39),
+    ("Quaest", "2026-09-27", "Flávio Bolsonaro (PL)", 42, 42),
+    ("Quaest", "2026-09-27", "Augusto Cury (Avante)", 42, 33),
+    ("AtlasIntel", "2026-09-28", "Flávio Bolsonaro (PL)", 47.6, 47.7),
+]
+
+
+# Série do 1º turno (votos totais) para o gráfico de evolução: (instituto, data_fim, {candidato: %})
+_C = ["Lula (PT)", "Flávio Bolsonaro (PL)", "Ronaldo Caiado (PSD)", "Romeu Zema (Novo)", "Renan Santos (Missão)",
+      "Augusto Cury (Avante)"]
+SERIE_1T = [(i, d, dict(zip(_C, v))) for i, d, v in [
+    ("Datafolha", "2026-07-23", (40, 32, 4, 3, 3, 2)), ("Datafolha", "2026-08-20", (39, 33, 5, 3, 4, 2)),
+    ("Datafolha", "2026-09-02", (38, 33, 4, 2, 3, 8)), ("Datafolha", "2026-09-10", (39, 35, 4, 2, 3, 6)),
+    ("Datafolha", "2026-09-16", (39, 36, 4, 2, 3, 6)), ("Datafolha", "2026-09-24", (40, 36, 4, 1, 3, 5)),
+    ("Datafolha", "2026-10-01", (42, 38, 3, 1, 3, 4)),
+    ("Quaest", "2026-07-13", (40, 28, 4, 2, 3, 1)), ("Quaest", "2026-08-03", (39, 30, 4, 2, 4, 1)),
+    ("Quaest", "2026-08-13", (38, 31, 4, 2, 4, 2)), ("Quaest", "2026-09-01", (37, 29, 1, 1, 3, 10)),
+    ("Quaest", "2026-09-06", (36, 29, 3, 2, 3, 8)), ("Quaest", "2026-09-13", (36, 31, 4, 1, 4, 7)),
+    ("Quaest", "2026-09-20", (37, 33, 4, 1, 3, 6)), ("Quaest", "2026-09-27", (39, 34, 4, 1, 3, 4)),
+]]
+
+# Aprovação do governo Lula: (instituto, data_fim, {resposta: %})
+APROVACAO = [("Datafolha", "2026-10-01", {"Aprova": 48, "Desaprova": 49, "Não sabe": 3}),
+             ("AtlasIntel", "2026-09-28", {"Aprova": 45.2, "Desaprova": 53.6, "Não sabe": 1.2}),
+             ("Quaest", "2026-09-27", {"Aprova": 46, "Desaprova": 49, "Não sabe": 5})]
+
+# Rejeição ("não votaria de jeito nenhum"): (instituto, data_fim, {candidato: %})
+REJEICAO = [
+    ("Datafolha", "2026-10-01", {"Lula (PT)": 45, "Flávio Bolsonaro (PL)": 45}),
+    ("Real Time Big Data", "2026-09-23", {"Ronaldo Caiado (PSD)": 38, "Romeu Zema (Novo)": 35,
+                                          "Augusto Cury (Avante)": 31, "Wilson Grassi (Democrata)": 27}),
+]
+
+
+def _ficha(instituto: str, data_fim) -> dict | None:
+    return FICHAS.get((instituto, pd.to_datetime(data_fim).strftime("%Y-%m-%d")))
+
+
+RODAPE = ("Pesquisas: Datafolha, Quaest, AtlasIntel, CNT/MDA, PoderData, Nexus/BTG, Real Time Big Data, Vox Brasil, "
+          "Indexa/Broadcast, Meio/Ideia e Veritá; o registro no TSE está em cada ficha. Outras fontes: Correio Braziliense/Opinião, "
           "InfoMoney, Poder360, TSE e TREs. Classificação esquerda/direita simplificada pelo alinhamento com Lula ou "
           "Flávio. Pesquisas são retratos do momento, não previsões.")
 
@@ -343,7 +387,6 @@ RODAPE = ("Fontes: Datafolha, Quaest, AtlasIntel, Nexus/BTG, Real Time Big Data,
 # 1. EXTRAIR
 # ===========================================================================
 FONTES: list[dict] = []
-WIKI_HTML: str | None = None   # página da Wikipédia baixada em extrair_pesquisas, reaproveitada no histórico
 
 
 def registrar(nome: str, ok: bool, status: str) -> None:
@@ -366,8 +409,6 @@ def extrair_pesquisas(offline: bool) -> pd.DataFrame:
         return seed
     try:
         html = _get(WIKI_URL, 30).text
-        global WIKI_HTML
-        WIKI_HTML = html
         for tabela in pd.read_html(StringIO(html), flavor="lxml"):
             if isinstance(tabela.columns, pd.MultiIndex):
                 # junta os níveis do cabeçalho ignorando os "Unnamed" e repetições
@@ -401,70 +442,6 @@ def extrair_pesquisas(offline: bool) -> pd.DataFrame:
     except Exception as erro:
         registrar("Pesquisas nacionais (Wikipédia)", False, f"falhou ({str(erro)[:60]}), usando snapshot")
         return seed
-
-
-def _achatar(tabela: pd.DataFrame) -> pd.DataFrame:
-    if isinstance(tabela.columns, pd.MultiIndex):
-        nomes = []
-        for col in tabela.columns:
-            partes = []
-            for n in map(str, col):
-                if not n.startswith("Unnamed") and n not in partes:
-                    partes.append(n)
-            nomes.append(" ".join(partes).strip())
-        tabela.columns = nomes
-    return tabela
-
-
-def extrair_historico(seed: pd.DataFrame) -> pd.DataFrame:
-    """Todas as pesquisas de 1º turno Lula × Flávio da Wikipédia (2025 em diante), para o gráfico de evolução."""
-    if not WIKI_HTML:
-        registrar("Histórico de pesquisas (Wikipédia)", False, "sem a página da Wikipédia, só o snapshot")
-        return seed.copy()
-    try:
-        from lxml import html as lhtml
-        doc = lhtml.fromstring(WIKI_HTML)
-        blocos, secao, ano = [], "", None
-        for el in doc.iter("h2", "h3", "table"):
-            texto = el.text_content().strip()
-            if el.tag == "h2":
-                secao, ano = texto.lower(), None
-            elif el.tag == "h3":
-                achado = re.search(r"\b(20\d\d)\b", texto)
-                ano = int(achado.group(1)) if achado else None     # "Polling aggregation" etc. ficam de fora
-            elif "wikitable" in (el.get("class") or "") and secao.startswith("first") and ano:
-                blocos.append((ano, lhtml.tostring(el, encoding="unicode")))
-        partes = []
-        for ano, trecho in blocos:
-            tabela = _achatar(pd.read_html(StringIO(trecho), flavor="lxml")[0])
-            cols = {c: str(c).lower() for c in tabela.columns}
-            col_l = next((c for c, l in cols.items() if l.startswith("lula")), None)
-            col_f = next((c for c, l in cols.items() if "f. bolsonaro" in l or "flávio" in l), None)
-            col_i = next((c for c, l in cols.items() if "pollster" in l or "polling firm" in l or "institut" in l), None)
-            col_d = next((c for c, l in cols.items() if "period" in l or "date" in l), None)
-            col_u = next((c for c, l in cols.items() if "undec" in l or "blank" in l), None)
-            if not all([col_l, col_f, col_i, col_d]):
-                continue
-            numero = r"\s*\d+(?:[.,]\d+)?\s*%?\s*(?:\[[^\]]*\])*\s*"      # descarta linhas de eventos ("PSD lança...")
-            ok = tabela[col_l].astype(str).str.fullmatch(numero) & tabela[col_f].astype(str).str.fullmatch(numero)
-            t = tabela.loc[ok, [col_i, col_d, col_l, col_f]].copy()
-            t.columns = ["instituto", "data_fim", "lula", "flavio"]
-            t["data_fim"] = t["data_fim"].map(lambda v: _data(v, ano)).map(
-                lambda d: d.strftime("%Y-%m-%d") if pd.notna(d) else None)
-            t["margem"] = MARGEM_PADRAO
-            indec = tabela.loc[ok, col_u].map(_pct) if col_u else None
-            t["base"] = "total" if indec is None else indec.map(
-                lambda v: "baixo_indeciso" if v is not None and v < 5 else "total")
-            t["fonte"] = "wikipedia"
-            partes.append(t)
-        if not partes:
-            raise ValueError("nenhuma tabela de 1º turno com Lula e Flávio")
-        hist = pd.concat(partes + [seed], ignore_index=True)
-        registrar("Histórico de pesquisas (Wikipédia)", True, f"{sum(len(p) for p in partes)} linhas em {len(partes)} tabelas")
-        return hist
-    except Exception as erro:
-        registrar("Histórico de pesquisas (Wikipédia)", False, f"falhou ({str(erro)[:60]}), só o snapshot")
-        return seed.copy()
 
 
 def extrair_eleitorado(offline: bool) -> dict:
@@ -738,13 +715,13 @@ def _pct(valor) -> float | None:
     return float(achado.group().replace(",", ".")) if achado else None
 
 
-def _data(valor, ano: int = 2026) -> pd.Timestamp:
+def _data(valor) -> pd.Timestamp:
     texto = str(valor)
     if re.fullmatch(r"\d{4}-\d{2}-\d{2}", texto):
         return pd.to_datetime(texto, format="%Y-%m-%d")
     texto = re.split(r"\s*[–-]\s*", texto)[-1].strip()      # "30 Aug – 2 Sep" -> "2 Sep"
     if not re.search(r"\d{4}", texto):
-        texto += f" {ano}"
+        texto += " 2026"
     return pd.to_datetime(texto, errors="coerce", dayfirst=True)
 
 
@@ -752,8 +729,7 @@ def tratar(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["instituto"] = (df["instituto"].astype(str).str.replace(r"\[.*?\]", "", regex=True)
                        .str.split("/").str[0].str.strip())
-    df["instituto"] = df["instituto"].replace({"Real Time": "Real Time Big Data", "Genial": "Quaest", "Meio": "Ideia",
-                                                     "CNT": "CNT/MDA", "MDA": "CNT/MDA"})
+    df["instituto"] = df["instituto"].replace({"Real Time": "Real Time Big Data", "Genial": "Quaest", "Meio": "Ideia", "CNT": "CNT/MDA", "MDA": "CNT/MDA"})
     df["data_fim"] = df["data_fim"].map(_data)
     for col in ["lula", "flavio", "margem"]:
         df[col] = df[col].map(_pct)
@@ -772,7 +748,9 @@ def agregar(df: pd.DataFrame, eleitorado: dict):
     df["diferenca"] = (df["lula"] - df["flavio"]).round(1)
     df["empate_tecnico"] = df["diferenca"].abs() <= 2 * df["margem"]
     corte = df["data_fim"].max() - pd.Timedelta(days=JANELA_DIAS)
-    recentes = df[(df["data_fim"] >= corte) & (df["base"] == "total")].drop_duplicates("instituto")
+    df["tem_ficha"] = [(_ficha(i, d) is not None) for i, d in zip(df["instituto"], df["data_fim"])]
+    base_media = df[df["tem_ficha"]] if PUBLICO else df
+    recentes = base_media[(base_media["data_fim"] >= corte) & (base_media["base"] == "total")].drop_duplicates("instituto")
     media = {"lula": round(recentes["lula"].mean(), 1), "flavio": round(recentes["flavio"].mean(), 1),
              "n": int(len(recentes)), "janela": JANELA_DIAS}
 
@@ -825,42 +803,6 @@ def agregar(df: pd.DataFrame, eleitorado: dict):
     return df, uf, gov, reg, seg, media
 
 
-def media_aprovacao() -> tuple[pd.DataFrame, pd.DataFrame]:
-    ap = pd.DataFrame(SEED_APROVACAO, columns=["instituto", "data_fim", "aprova", "desaprova"])
-    ap["data_fim"] = pd.to_datetime(ap["data_fim"])
-    ap = ap.sort_values("data_fim").reset_index(drop=True)
-    linhas = []
-    for dia in pd.date_range(ap["data_fim"].min(), ap["data_fim"].max(), freq="D"):
-        for dias in (JANELA_APROVACAO, 45):   # sem rodada nos últimos 30 dias: estende até 45 para a linha não quebrar
-            j = ap[(ap["data_fim"] > dia - pd.Timedelta(days=dias)) & (ap["data_fim"] <= dia)]
-            if len(j):
-                break
-        ult = j.drop_duplicates("instituto", keep="last")
-        if len(ult):
-            linhas.append({"data": dia, "aprova": round(ult["aprova"].mean(), 1),
-                           "desaprova": round(ult["desaprova"].mean(), 1), "n": int(len(ult))})
-    return ap, pd.DataFrame(linhas)
-
-
-def media_movel(hist: pd.DataFrame) -> pd.DataFrame:
-    """Para cada dia: média da pesquisa mais recente de cada instituto nos últimos JANELA_DIAS dias (mesma regra do topo).
-    Em períodos com poucas pesquisas (menos de 3 institutos), a janela se estende até 30 dias para a linha não quebrar."""
-    h = hist[hist["base"] == "total"].sort_values("data_fim")
-    if h.empty:
-        return pd.DataFrame(columns=["data", "lula", "flavio", "n"])
-    linhas = []
-    for dia in pd.date_range(h["data_fim"].min(), h["data_fim"].max(), freq="D"):
-        for dias in (JANELA_DIAS, 21, 30):
-            janela = h[(h["data_fim"] >= dia - pd.Timedelta(days=dias)) & (h["data_fim"] <= dia)]
-            if janela["instituto"].nunique() >= 3:
-                break
-        ult = janela.sort_values("data_fim").drop_duplicates("instituto", keep="last")
-        if len(ult):
-            linhas.append({"data": dia, "lula": round(ult["lula"].mean(), 1), "flavio": round(ult["flavio"].mean(), 1),
-                           "n": int(len(ult))})
-    return pd.DataFrame(linhas)
-
-
 # ===========================================================================
 # 4. PUBLICAR
 # ===========================================================================
@@ -868,20 +810,9 @@ def _num(v):
     return None if pd.isna(v) else (int(v) if float(v).is_integer() else float(v))
 
 
-def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticias=None, criterio="",
-             hist=None, movel=None) -> Path:
+def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticias=None, criterio="") -> Path:
     SAIDA.mkdir(exist_ok=True)
     op = dict(index=False, sep=";", decimal=",", encoding="utf-8-sig")
-    hist = hist if hist is not None else pesq
-    movel = movel if movel is not None else media_movel(hist)
-    hist.to_csv(SAIDA / "fato_historico_nacional.csv", date_format="%Y-%m-%d", **op)
-    movel.to_csv(SAIDA / "fato_media_movel.csv", date_format="%Y-%m-%d", **op)
-    aprov, aprov_media = media_aprovacao()
-    aprov.to_csv(SAIDA / "fato_aprovacao.csv", date_format="%Y-%m-%d", **op)
-    pd.DataFrame(SEED_REJEICAO, columns=["instituto", "data_fim", "rejeicao_lula", "rejeicao_flavio"]).to_csv(
-        SAIDA / "fato_rejeicao.csv", **op)
-    pd.DataFrame(EVENTOS, columns=["data", "candidato", "titulo", "detalhe", "fonte"]).to_csv(SAIDA / "dim_eventos.csv", **op)
-    aprov_media.to_csv(SAIDA / "fato_aprovacao_media.csv", date_format="%Y-%m-%d", **op)
     pesq.to_csv(SAIDA / "fato_pesquisas_nacional.csv", date_format="%Y-%m-%d", **op)
     uf.to_csv(SAIDA / "dim_uf.csv", **op)
     gov.to_csv(SAIDA / "fato_governadores.csv", **op)
@@ -897,10 +828,26 @@ def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticia
     dia = lambda d: f"{d.day}/{d.month}"
     dados = {
         "atualizado": atualizado, "eleicao": DATA_ELEICAO, "comparecimento": COMPARECIMENTO, "media": media,
-        "pesquisas": [{"i": r.instituto, "d": dia(r.data_fim), "l": r.lula, "f": r.flavio, "base": r.base}
-                      for r in pesq.drop_duplicates("instituto").head(10).itertuples()],
+        "pesquisas": [{"i": r.instituto, "d": dia(r.data_fim), "l": r.lula, "f": r.flavio, "base": r.base,
+                       "ficha": _ficha(r.instituto, r.data_fim)}
+                      for r in (pesq[pesq["tem_ficha"]] if PUBLICO else pesq).drop_duplicates("instituto").head(10).itertuples()],
+        "publico": PUBLICO,
+        "candidatos": [{"i": i, "d": dia(pd.to_datetime(d)), "ficha": FICHAS.get((i, d)), "votos": v,
+                        "base": "baixo_indeciso" if i in ("AtlasIntel", "Palver") else "total"}
+                       for (i, d), v in CANDIDATOS_1T.items() if (not PUBLICO or (i, d) in FICHAS)],
+        "serie": [{"i": i, "d": dia(pd.to_datetime(d)), "iso": d, "votos": v, "ficha": FICHAS.get((i, d))}
+                  for i, d, v in SERIE_1T if (not PUBLICO or (i, d) in FICHAS)],
+        "aprovacao": [{"i": i, "d": dia(pd.to_datetime(d)), "v": v, "ficha": FICHAS.get((i, d))}
+                      for i, d, v in APROVACAO if (not PUBLICO or (i, d) in FICHAS)],
+        "rejeicao": [{"i": i, "d": dia(pd.to_datetime(d)), "v": v, "ficha": FICHAS.get((i, d))}
+                     for i, d, v in REJEICAO if (not PUBLICO or (i, d) in FICHAS)],
+        "cenarios2t": [{"i": i, "d": dia(pd.to_datetime(d)), "adv": a, "l": l, "o": o}
+                       for i, d, a, l, o in CENARIOS_2T if (not PUBLICO or (i, d) in FICHAS)],
         "seg2t": [{"i": r.instituto, "d": dia(pd.to_datetime(r.data_fim)), "l": r.lula, "f": r.flavio,
-                   "base": "validos" if r.instituto == "AtlasIntel" else "total"} for r in seg.itertuples()],
+                   "base": "baixo_indeciso" if r.instituto == "AtlasIntel" else "total",
+                   "ficha": _ficha(r.instituto, r.data_fim)}
+                  for r in seg.sort_values("data_fim", ascending=False).itertuples()
+                  if (not PUBLICO or _ficha(r.instituto, r.data_fim))],
         "ufs": [{"uf": r.uf, "regiao": r.regiao, "v22": r.vencedor_2022, "l26": r.lider_2026, "gov": r.governo_alinhamento,
                  "l1": _num(r.lula_1t_2026), "f1": _num(r.flavio_1t_2026), "fonte1": FONTE_1T_UF.get(r.uf, FONTE_1T_PADRAO),
                  "l2": _num(r.lula_2t_2026), "f2": _num(r.flavio_2t_2026), "lider2": r.lider_2t_2026, "fonte2": FONTE_2T_UF.get(r.uf),
@@ -914,23 +861,9 @@ def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticia
         "fontes": FONTES + [{"nome": "Pesquisas estaduais, 2º turno, governadores, Senado e DF", "ok": False,
                              "status": f"snapshot manual de {DATA_SNAPSHOT}"}],
         "rodape": RODAPE,
-        "historico": {
-            "pontos": [[r.data_fim.strftime("%Y-%m-%d"), r.instituto, r.lula, r.flavio]
-                       for r in hist[hist["base"] == "total"].sort_values("data_fim").itertuples()],
-            "media": [[r.data.strftime("%Y-%m-%d"), r.lula, r.flavio, r.n] for r in movel.itertuples()],
-            "fora": int((hist["base"] != "total").sum()), "janela": JANELA_DIAS,
-        },
-        "rejeicao": [[d, i, _num(l), _num(f)] for i, d, l, f in sorted(SEED_REJEICAO, key=lambda r: r[1])],
-        "eventos": [{"d": d, "c": c, "t": t, "x": x, "f": f} for d, c, t, x, f in EVENTOS],
-        "aprovacao": {
-            "pontos": [[r.data_fim.strftime("%Y-%m-%d"), r.instituto, _num(r.aprova), _num(r.desaprova)]
-                       for r in aprov.itertuples()],
-            "media": [[r.data.strftime("%Y-%m-%d"), r.aprova, r.desaprova, r.n] for r in aprov_media.itertuples()],
-            "janela": JANELA_APROVACAO,
-        },
     }
     html = TEMPLATE.read_text(encoding="utf-8").replace("/*__DADOS__*/null", json.dumps(dados, ensure_ascii=False))
-    destino = SAIDA / "painel_eleicoes_2026.html"
+    destino = SAIDA / NOME_SAIDA
     destino.write_text(html, encoding="utf-8")
 
     com = uf.dropna(subset=["saldo_1t"])
@@ -971,6 +904,9 @@ def apuracao_ao_vivo(args) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description="Pipeline diário das eleições 2026")
     ap.add_argument("--offline", action="store_true", help="não acessa a internet; usa só o snapshot")
+    ap.add_argument("--completo", action="store_true",
+                    help="gera a visão completa (pesquisas estaduais sem ficha incluídas) em saida/painel_completo.html; "
+                         "uso pessoal, não publique")
     ap.add_argument("--codigo-eleicao", help="código da eleição no TSE (ex.: 619), se a descoberta automática falhar")
     ap.add_argument("--codigo-estadual", help="código da eleição estadual no TSE (governador/senado), se a descoberta falhar")
     ap.add_argument("--turno", type=int, default=1, choices=[1, 2])
@@ -978,6 +914,9 @@ def main() -> None:
                     help="modo ao vivo: lê só a apuração do TSE e grava apuracao.json (usado no dia da eleição)")
     ap.add_argument("--com-deputados", action="store_true", help="no modo ao vivo, relê também os deputados (mais lento)")
     args = ap.parse_args()
+    global PUBLICO, NOME_SAIDA
+    if args.completo:
+        PUBLICO, NOME_SAIDA = False, "painel_completo.html"
 
     if args.so_apuracao:
         apuracao_ao_vivo(args)
@@ -988,10 +927,8 @@ def main() -> None:
     resultado = extrair_resultado(args.offline, args.codigo_eleicao, args.turno, args.codigo_estadual)
     noticias, criterio = classificar_noticias(extrair_noticias(args.offline))
     pesq, uf, gov, reg, seg, media = agregar(tratar(bruto), eleitorado)
-    hist = tratar(extrair_historico(bruto[bruto["fonte"] == "snapshot"]))
     agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
-    publicar(pesq, uf, gov, reg, seg, media, resultado, agora.strftime("%d/%m/%Y às %Hh%M"), noticias, criterio,
-             hist, media_movel(hist))
+    publicar(pesq, uf, gov, reg, seg, media, resultado, agora.strftime("%d/%m/%Y às %Hh%M"), noticias, criterio)
 
 
 if __name__ == "__main__":
