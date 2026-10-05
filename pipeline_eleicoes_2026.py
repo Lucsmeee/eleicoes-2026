@@ -400,6 +400,9 @@ def _get(url: str, timeout: int = 60):
     return r
 
 
+WEB_2T: list[dict] = []   # pesquisas de 2º turno lidas da Wikipédia
+
+
 def extrair_pesquisas(offline: bool) -> pd.DataFrame:
     seed = pd.DataFrame(SEED_NACIONAL, columns=["instituto", "data_fim", "lula", "flavio", "margem", "base"])
     seed["fonte"] = "snapshot"
@@ -408,6 +411,7 @@ def extrair_pesquisas(offline: bool) -> pd.DataFrame:
         return seed
     try:
         html = _get(WIKI_URL, 30).text
+        primeira = None
         for tabela in pd.read_html(StringIO(html), flavor="lxml"):
             if isinstance(tabela.columns, pd.MultiIndex):
                 # junta os níveis do cabeçalho ignorando os "Unnamed" e repetições
@@ -425,8 +429,23 @@ def extrair_pesquisas(offline: bool) -> pd.DataFrame:
             col_i = next((c for c, l in cols.items() if "pollster" in l or "institut" in l), None)
             col_d = next((c for c, l in cols.items() if any(k in l for k in ("period", "date", "data", "fieldwork"))), None)
             col_m = next((c for c, l in cols.items() if "margin" in l), None)
+            col_n = next((c for c, l in cols.items() if "sample" in l), None)
             col_u = next((c for c, l in cols.items() if "undec" in l or "blank" in l), None)
-            if all([col_l, col_f, col_i, col_d]):
+            if not all([col_l, col_f, col_i, col_d]):
+                continue
+            outros = any(k in l for l in cols.values() for k in ("caiado", "zema", "cury", "santos", "others"))
+            if not outros:
+                # tabela de 2º turno Lula x Flávio: guarda só as pesquisas feitas depois do 1º turno
+                for _, lin in tabela.iterrows():
+                    d = _data(lin[col_d])
+                    if pd.notna(d) and d.date() > DATA_1T and _pct(lin[col_l]) and _pct(lin[col_f]):
+                        WEB_2T.append({"instituto": str(lin[col_i]).split("[")[0].split("/")[0].strip(), "data_fim": d,
+                                       "lula": _pct(lin[col_l]), "flavio": _pct(lin[col_f]),
+                                       "margem": (_pct(lin[col_m]) if col_m else None) or MARGEM_PADRAO,
+                                       "entrevistas": _pct(str(lin[col_n]).replace(",", "")) if col_n else None,
+                                       "fonte": "wikipedia"})
+                continue
+            if primeira is None:
                 web = tabela[[col_i, col_d, col_l, col_f]].copy()
                 web.columns = ["instituto", "data_fim", "lula", "flavio"]
                 web["margem"] = tabela[col_m].map(_pct) if col_m else MARGEM_PADRAO
@@ -435,8 +454,10 @@ def extrair_pesquisas(offline: bool) -> pd.DataFrame:
                 indec = tabela[col_u].map(_pct) if col_u else None
                 web["base"] = "total" if indec is None else indec.map(lambda v: "baixo_indeciso" if v is not None and v < 5 else "total")
                 web["fonte"] = "wikipedia"
-                registrar("Pesquisas nacionais (Wikipédia)", True, f"{len(web)} linhas lidas")
-                return pd.concat([web, seed], ignore_index=True)
+                primeira = web
+        if primeira is not None:
+            registrar("Pesquisas nacionais (Wikipédia)", True, f"{len(primeira)} linhas do 1º turno, {len(WEB_2T)} do 2º")
+            return pd.concat([primeira, seed], ignore_index=True)
         raise ValueError("tabela com Lula e Flávio não encontrada")
     except Exception as erro:
         registrar("Pesquisas nacionais (Wikipédia)", False, f"falhou ({str(erro)[:60]}), usando snapshot")
@@ -534,58 +555,111 @@ def _partido(cc) -> str:
     return cc.split("(")[0].strip() or "?"
 
 
-def _resumo_proporcional(r: dict) -> dict:
-    """Deputados: votos nominais e eleitos por partido/federação + mais votados (não guarda a lista inteira)."""
-    partidos = {}
-    for c in r["cands"]:
-        x = partidos.setdefault(c["partido"], {"p": c["partido"], "votos": 0, "eleitos": 0})
-        x["votos"] += c["votos"]
-        x["eleitos"] += int(c["eleito"])
-    tot = sum(x["votos"] for x in partidos.values()) or 1
-    lista = sorted(partidos.values(), key=lambda x: (-x["eleitos"], -x["votos"]))
-    for x in lista:
-        x["pct"] = round(x["votos"] / tot * 100, 2)
-    return {"pst": r["pst"], "partidos": lista[:20], "eleitos_total": sum(x["eleitos"] for x in lista),
-            "top": [{k: c[k] for k in ("nm", "partido", "votos", "pct", "eleito")} for c in r["cands"][:15]]}
+def _n_tse(v) -> float:
+    """Números do TSE vêm como texto: '47,03' -> 47.03; '56104503' -> 56104503; vazio -> 0."""
+    if v is None or v == "":
+        return 0.0
+    try:
+        return float(str(v).replace(".", "").replace(",", "."))
+    except ValueError:
+        return 0.0
+
+
+def _situacao(e, st) -> str | None:
+    t = str(st or "").lower()
+    if "turno" in t:
+        return "2turno"
+    if "suplente" in t:
+        return "suplente"
+    if "não eleito" in t or "nao eleito" in t:
+        return None
+    if str(e or "").lower() == "s" or "eleito" in t:
+        return "eleito"
+    return None
+
+
+# Códigos das eleições de 2026 no TSE (confirmados no ele-c.json oficial): 1º turno / 2º turno
+COD_FEDERAL = {1: "6257", 2: "6258"}    # presidente
+COD_ESTADUAL = {1: "6259", 2: "6260"}   # governador, senado, deputados
 
 
 def _ler_tse(codigo: str, uf: str, cargo: int) -> dict:
-    """Lê o JSON simplificado de resultados do TSE (formato de 2022) para um cargo numa UF ("br" = Brasil)."""
-    cod6 = f"{int(codigo):06d}"
-    url = f"{TSE_RESULTADOS}/ele2026/{int(codigo)}/dados-simplificados/{uf}/{uf}-c{cargo:04d}-e{cod6}-r.json"
+    """Lê o arquivo de resultado unificado (EA20) do TSE de 2026:
+    /oficial/ele2026/{eleição}/dados/{uf}/{uf}-c{cargo}-e{eleição}-u.json
+    Candidatos ficam em carg[0].agr[] (agremiação/federação) -> par[] (partido) -> cand[]."""
+    cod = int(codigo)
+    url = f"{TSE_RESULTADOS}/ele2026/{cod}/dados/{uf}/{uf}-c{cargo:04d}-e{cod:06d}-u.json"
     j = _get(url, 30).json()
-    cands = [{"nm": _nome(c.get("nm", "")), "votos": int(c.get("vap", 0) or 0), "pct": _pct_tse(c.get("pvap")),
-              "partido": _partido(c.get("cc", "")),
-              "eleito": str(c.get("e", "n")).lower() == "s" or str(c.get("st", "")).lower().startswith("eleito")}
-             for c in j.get("cand", [])]
+    carg = (j.get("carg") or [{}])[0]
+    cands, agrs = [], []
+    for agr in carg.get("agr", []):
+        siglas, votos_agr = [], 0.0
+        for par in agr.get("par", []):
+            siglas.append(par.get("sg", ""))
+            votos_agr += _n_tse(par.get("tvtn")) + _n_tse(par.get("tvtl"))      # nominais + legenda
+            for c in par.get("cand", []):
+                valido = not c.get("dvt") or str(c.get("dvt")).startswith("Válido")
+                sit = _situacao(c.get("e"), c.get("st"))
+                cands.append({"nm": _nome(c.get("nmu") or c.get("nm")), "partido": par.get("sg", ""),
+                              "votos": int(_n_tse(c.get("vap"))), "pct": _n_tse(c.get("pvap")) if valido else 0.0,
+                              "eleito": sit == "eleito", "segundo_turno": sit == "2turno",
+                              "agr": "/".join(x for x in siglas if x) or agr.get("nm", "")})
+        sig = "/".join(x for x in siglas if x)
+        agrs.append({"p": sig or agr.get("nm", ""), "nome": agr.get("nm", ""), "votos": int(votos_agr),
+                     "vagas": int(_n_tse(agr.get("vag"))) if agr.get("vag") not in (None, "") else None})
     cands.sort(key=lambda c: -c["votos"])
-    return {"pst": _pct_tse(j.get("pst")), "hora": j.get("hg") or "", "cands": cands}
+    sres = j.get("s") or {}
+    pst = _n_tse(sres.get("pst"))
+    return {"pst": pst, "hora": j.get("ht") or j.get("hg") or "", "cands": cands, "agrs": agrs,
+            "final": j.get("tf") == "s", "definido": j.get("tf") == "s" or (pst >= 100 and j.get("md") == "s")}
 
 
 def _lula_flavio(cands: list[dict]) -> dict | None:
     lula = next((c for c in cands if "LULA" in c["nm"].upper()), None)
-    flav = next((c for c in cands if "BOLSONARO" in c["nm"].upper()), None)
+    flav = next((c for c in cands if "BOLSONARO" in c["nm"].upper() and c.get("partido", "PL") == "PL"), None)
     if not (lula and flav):
         return None
     return {"lula_pct": lula["pct"], "flavio_pct": flav["pct"], "lula_votos": lula["votos"], "flavio_votos": flav["votos"]}
 
 
-def extrair_resultado(offline: bool, codigo: str | None, turno: int, codigo_est: str | None = None,
+def _resumo_proporcional(r: dict) -> dict:
+    """Deputados: bancada por agremiação (vagas distribuídas pelo TSE), votos e mais votados."""
+    tot = sum(a["votos"] for a in r["agrs"]) or 1
+    eleitos_cand = {}
+    for c in r["cands"]:
+        if c["eleito"]:
+            eleitos_cand[c["agr"]] = eleitos_cand.get(c["agr"], 0) + 1
+    partidos = []
+    for a in r["agrs"]:
+        el = a["vagas"] if a["vagas"] is not None else eleitos_cand.get(a["p"], 0)
+        partidos.append({"p": a["p"], "votos": a["votos"], "pct": round(a["votos"] / tot * 100, 2), "eleitos": el})
+    partidos.sort(key=lambda x: (-x["eleitos"], -x["votos"]))
+    top = [{k: c[k] for k in ("nm", "partido", "votos", "pct", "eleito")} for c in r["cands"][:15]]
+    return {"pst": r["pst"], "partidos": partidos[:20], "eleitos_total": sum(x["eleitos"] for x in partidos), "top": top}
+
+
+def turno_atual() -> int:
+    """2º turno a partir de 25/10/2026 (Brasília); antes disso, 1º turno."""
+    return 2 if datetime.now(ZoneInfo("America/Sao_Paulo")).date() >= date(2026, 10, 25) else 1
+
+
+def extrair_resultado(offline: bool, codigo: str | None, turno: int | None = None, codigo_est: str | None = None,
                       deputados: bool = True) -> dict | None:
+    turno = turno or turno_atual()
     hoje = datetime.now(ZoneInfo("America/Sao_Paulo")).date()
-    if offline or (codigo is None and hoje < date(2026, 10, 4)):
+    if offline or hoje < date(2026, 10, 4):
         registrar("Apuração oficial (TSE)", False, "ainda não começou" if not offline else "offline")
         return None
     try:
-        codigo = codigo or _descobrir_codigo(turno, "federal")
-        if not codigo:
-            raise ValueError("código da eleição não encontrado; rode com --codigo-eleicao")
+        codigo = str(codigo or COD_FEDERAL[turno])
+        codigo_est = str(codigo_est or COD_ESTADUAL[turno])
         br = _ler_tse(codigo, "br", 1)
         res = _lula_flavio(br["cands"])
         if not res:
-            raise ValueError("candidatos não encontrados no JSON nacional")
-        res.update({"pst": br["pst"], "hora": br["hora"], "cands": br["cands"][:10], "por_uf": {}, "estados": {},
-                    "tse": {"base": TSE_RESULTADOS, "federal": str(int(codigo))}})
+            raise ValueError("candidatos não encontrados no arquivo nacional")
+        res.update({"turno": turno, "pst": br["pst"], "hora": br["hora"], "final": br["final"], "definido": br["definido"],
+                    "cands": br["cands"][:12], "por_uf": {}, "estados": {},
+                    "tse": {"base": TSE_RESULTADOS, "federal": str(int(codigo)), "estadual": str(int(codigo_est))}})
         for uf in UFS:
             try:
                 r = _ler_tse(codigo, uf.lower(), 1)
@@ -594,28 +668,26 @@ def extrair_resultado(offline: bool, codigo: str | None, turno: int, codigo_est:
                     res["por_uf"][uf] = {"pst": r["pst"], **lf}
             except Exception:
                 pass
-        # Governador (cargo 3) e Senado (cargo 5) de todas as UFs ficam na eleição estadual
-        try:
-            codigo_est = codigo_est or _descobrir_codigo(turno, "estadual")
-            if codigo_est:
-                res["tse"]["estadual"] = str(int(codigo_est))
-                for uf in UFS:
-                    for nome, cargo in (("governador", 3), ("senador", 5)):
-                        try:
-                            r = _ler_tse(codigo_est, uf.lower(), cargo)
-                            res["estados"].setdefault(uf, {})[nome] = {"pst": r["pst"], "cands": r["cands"][:8]}
-                        except Exception:
-                            pass
-                    for nome, cargo in ((("dep_federal", 6), ("dep_estadual", 8 if uf == "DF" else 7)) if deputados else ()):
-                        try:
-                            r = _ler_tse(codigo_est, uf.lower(), cargo)
-                            res["estados"].setdefault(uf, {})[nome] = _resumo_proporcional(r)
-                        except Exception:
-                            pass
-        except Exception:
-            pass
-        status = (f"eleição {codigo}, " + f"{res['pst']:.2f}".replace(".", ",") + f"% das seções, "
-                  f"{len(res['por_uf'])} UFs, governador/senado/deputados em {len(res['estados'])} UFs")
+        # Governador (3), Senado (5) e deputados (6; 7 ou 8 no DF) ficam na eleição estadual.
+        # No 2º turno só há governador (nas UFs que tiveram 2º turno).
+        cargos_maj = (("governador", 3),) if turno == 2 else (("governador", 3), ("senador", 5))
+        cargos_prop = () if (turno == 2 or not deputados) else (("dep_federal", 6), ("dep_estadual", None))
+        for uf in UFS:
+            for nome, cargo in cargos_maj:
+                try:
+                    r = _ler_tse(codigo_est, uf.lower(), cargo)
+                    if r["cands"]:
+                        res["estados"].setdefault(uf, {})[nome] = {"pst": r["pst"], "cands": r["cands"][:8]}
+                except Exception:
+                    pass
+            for nome, cargo in cargos_prop:
+                try:
+                    r = _ler_tse(codigo_est, uf.lower(), cargo or (8 if uf == "DF" else 7))
+                    res["estados"].setdefault(uf, {})[nome] = _resumo_proporcional(r)
+                except Exception:
+                    pass
+        status = (f"{turno}º turno, eleição {codigo}, " + f"{res['pst']:.2f}".replace(".", ",") + f"% das seções, "
+                  f"{len(res['por_uf'])} UFs, cargos estaduais em {len(res['estados'])} UFs")
         registrar("Apuração oficial (TSE)", True, status)
         return res
     except Exception as erro:
@@ -702,6 +774,110 @@ def classificar_noticias(itens: list[dict]) -> tuple[list[dict], str]:
     data_snap = datetime.strptime(NOTICIAS_DATA, "%Y-%m-%d").strftime("%d/%m")
     registrar("Notícias do dia", False, f"sem acesso; mostrando snapshot de {data_snap}")
     return NOTICIAS_SNAPSHOT, f"snapshot de {data_snap}"
+
+
+
+# ===========================================================================
+# 2º TURNO (fase que começa no dia seguinte ao 1º turno)
+# ===========================================================================
+DATA_1T = date(2026, 10, 4)
+
+
+def fase_atual() -> str:
+    return "2t" if datetime.now(ZoneInfo("America/Sao_Paulo")).date() > DATA_1T else "1t"
+
+
+# Resultado oficial do 1º turno para presidente. O pipeline tenta ler do TSE e guarda em cache/resultado_1t.json;
+# estes números (TSE e Metrópoles, 04-05/10) são o plano B. uf: (votos Lula, % Lula, votos Flávio, % Flávio)
+RESULTADO_1T_UF = {
+    "AC": (134770, 28.73, 302807, 64.56), "AL": (995459, 54.73, 735718, 40.45), "AM": (1042340, 48.13, 976222, 45.08),
+    "AP": (212503, 45.71, 212278, 45.67), "BA": (5641207, 66.12, 2438241, 28.58), "CE": (3552535, 63.28, 1756239, 31.28),
+    "DF": (675627, 38.11, 909616, 51.31), "ES": (850028, 37.76, 1233194, 54.78), "GO": (1188880, 31.06, 2051888, 53.60),
+    "MA": (2561100, 63.95, 1238495, 30.93), "MG": (5187467, 43.32, 5776818, 48.24), "MT": (581681, 29.18, 1298581, 65.15),
+    "MS": (516855, 34.68, 873351, 58.60), "PA": (2425810, 49.90, 2163557, 44.51), "PB": (1540937, 61.31, 831205, 33.07),
+    "PE": (3553971, 63.45, 1738043, 31.03), "PI": (1520985, 70.97, 516574, 24.10), "PR": (2054597, 31.20, 3945345, 59.91),
+    "RJ": (3693021, 39.41, 4966844, 53.01), "RN": (1237963, 59.75, 720493, 34.77), "RS": (2294759, 35.73, 3573783, 55.64),
+    "RO": (250667, 25.89, 652988, 67.45), "RR": (74420, 22.86, 231322, 71.06), "SC": (1127168, 25.04, 3000020, 66.65),
+    "SE": (856019, 62.75, 417839, 30.63), "SP": (9505413, 38.20, 12922023, 51.93), "TO": (404009, 43.42, 469321, 50.44),
+}
+RESULTADO_1T_BR = {
+    "lula_votos": 53879538, "lula_pct": 45.16, "flavio_votos": 56104503, "flavio_pct": 47.03,
+    "validos": 119300788, "brancos": 2300798, "nulos": 3674249, "abstencao": 33469244, "abstencao_pct": 21.08,
+    "outros": [("Augusto Cury", "Avante", 3448569, 2.89), ("Renan Santos", "Missão", 2675887, 2.24),
+               ("Ronaldo Caiado", "PSD", 2605148, 2.18), ("Romeu Zema", "Novo", 326488, 0.27),
+               ("Samara Martins", "UP", 122911, 0.10), ("Hertz Dias", "PSTU", 43103, 0.04),
+               ("Clariana Barão", "DC", 40043, 0.03), ("Edmilson Costa", "PCB", 22693, 0.02),
+               ("Wilson Grassi", "Democrata", 16881, 0.01), ("Rui Costa Pimenta", "PCO", 15024, 0.01)],
+}
+
+# Governadores no 2º turno: uf, (nome, partido, campo, % no 1º turno) x 2.  campo: L = aliado de Lula, F = de Flávio, N = nenhum
+GOV_2T = [
+    ("AC", ("Mailza Assis", "PP", "F", 49.76), ("Alan Rick", "Republicanos", "F", 32.27)),
+    ("AM", ("Omar Aziz", "PSD", "L", 40.38), ("Maria do Carmo", "PL", "F", 24.72)),
+    ("DF", ("Celina Leão", "PP", "F", 49.93), ("Leandro Grass", "PT", "L", 34.48)),
+    ("ES", ("Lorenzo Pazolini", "Republicanos", "N", 49.65), ("Ricardo Ferraço", "MDB", "N", 34.06)),
+    ("RJ", ("Douglas Ruas", "PL", "F", 49.27), ("Eduardo Paes", "PSD", "L", 42.76)),
+    ("RN", ("Allyson Bezerra", "União", "N", 36.83), ("Cadu de Lula", "PT", "L", 36.21)),
+    ("TO", ("Professora Dorinha", "União", "N", 45.52), ("Vicentinho Júnior", "PSDB", "N", 43.94)),
+]
+
+# Pesquisas de 2º turno (Lula x Flávio), feitas depois de 4/10. A Wikipédia é lida sozinha; aqui vão as do snapshot.
+# (instituto, data_fim, lula, flavio, margem, entrevistas)
+PESQUISAS_2T = []
+
+# Transferência de votos (quando as pesquisas perguntarem): eliminado -> {"Lula": %, "Flávio": %, "fonte": "..."}
+TRANSFERENCIA = {}
+
+MEIA_VIDA_DIAS = 4      # peso da pesquisa cai pela metade a cada 4 dias
+JANELA_2T_DIAS = 14
+
+
+def resultado_1t(offline: bool) -> dict:
+    """Resultado oficial do 1º turno (presidente), do TSE quando possível; senão, o plano B acima."""
+    cache = CACHE / "resultado_1t.json"
+    if cache.exists():
+        try:
+            return json.loads(cache.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    br = dict(RESULTADO_1T_BR, outros=[list(x) for x in RESULTADO_1T_BR["outros"]], fonte="TSE (plano B do script)")
+    por_uf = {u: {"lula_votos": v[0], "lula_pct": v[1], "flavio_votos": v[2], "flavio_pct": v[3]}
+              for u, v in RESULTADO_1T_UF.items()}
+    if not offline:
+        try:
+            r = _ler_tse(COD_FEDERAL[1], "br", 1)
+            lf = _lula_flavio(r["cands"])
+            if lf and r["pst"] >= 99.9:
+                br.update(lf)
+                br["outros"] = [[c["nm"], c["partido"], c["votos"], c["pct"]] for c in r["cands"]
+                                if "LULA" not in c["nm"].upper() and "BOLSONARO" not in c["nm"].upper()]
+                br["fonte"] = "TSE"
+                novos = {}
+                for u in UFS:
+                    x = _lula_flavio(_ler_tse(COD_FEDERAL[1], u.lower(), 1)["cands"])
+                    if x:
+                        novos[u] = x
+                if len(novos) == len(UFS):
+                    por_uf = novos
+                    CACHE.mkdir(exist_ok=True)
+                    cache.write_text(json.dumps({"br": br, "por_uf": por_uf}, ensure_ascii=False), encoding="utf-8")
+        except Exception as erro:
+            print(f"[1º turno] usando plano B ({str(erro)[:60]})")
+    return {"br": br, "por_uf": por_uf}
+
+
+def media_ponderada_2t(linhas: list[dict]) -> dict | None:
+    """Uma pesquisa por instituto (a mais recente), peso = recência (meia-vida de 4 dias) x raiz(entrevistas/1000)."""
+    if not linhas:
+        return None
+    df = pd.DataFrame(linhas).sort_values("data_fim", ascending=False).drop_duplicates("instituto")
+    ref = df["data_fim"].max()
+    df = df[df["data_fim"] >= ref - pd.Timedelta(days=JANELA_2T_DIAS)]
+    dias = (ref - df["data_fim"]).dt.days
+    peso = (0.5 ** (dias / MEIA_VIDA_DIAS)) * ((df["entrevistas"].fillna(2000) / 1000) ** 0.5)
+    return {"lula": round(float((df["lula"] * peso).sum() / peso.sum()), 1),
+            "flavio": round(float((df["flavio"] * peso).sum() / peso.sum()), 1), "n": int(len(df)),
+            "pesos": {i: round(float(w / peso.sum() * 100)) for i, w in zip(df["instituto"], peso)}}
 
 
 # ===========================================================================
@@ -809,7 +985,42 @@ def _num(v):
     return None if pd.isna(v) else (int(v) if float(v).is_integer() else float(v))
 
 
-def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticias=None, criterio="") -> Path:
+def _aplicar_fase_2t(dados: dict, r1t: dict) -> None:
+    """Depois do 1º turno: mapa e saldo passam a usar o resultado real das urnas; entram as pesquisas de 2º turno."""
+    pu = r1t["por_uf"]
+    for u in dados["ufs"]:
+        x = pu.get(u["uf"])
+        if not x:
+            continue
+        u.update({"l1": x["lula_pct"], "f1": x["flavio_pct"], "fonte1": "urnas, 1º turno",
+                  "l26": "L" if x["lula_pct"] > x["flavio_pct"] else "F",
+                  "saldo1": int(x["lula_votos"] - x["flavio_votos"]), "lula_votos": x["lula_votos"],
+                  "flavio_votos": x["flavio_votos"], "l2": None, "f2": None, "lider2": "?", "saldo2": None, "nota": None})
+    reg = {}
+    for u in dados["ufs"]:
+        x = pu.get(u["uf"])
+        if not x:
+            continue
+        validos = (x["lula_votos"] + x["flavio_votos"]) / max(0.01, (x["lula_pct"] + x["flavio_pct"]) / 100)
+        r = reg.setdefault(u["regiao"], [u["regiao"], 0, 0, 0, 0])
+        r[1] += int(validos); r[2] += int(x["lula_votos"]); r[3] += int(x["flavio_votos"])
+    dados["reg"] = list(reg.values())
+    dados["r1t"] = r1t["br"]
+    dados["gov2t"] = [{"uf": uf, "a": {"nm": a[0], "p": a[1], "campo": a[2], "pct": a[3]},
+                       "b": {"nm": b[0], "p": b[1], "campo": b[2], "pct": b[3]}} for uf, a, b in GOV_2T]
+    linhas = [{"instituto": i, "data_fim": pd.to_datetime(d), "lula": l, "flavio": f, "margem": m, "entrevistas": n,
+               "fonte": "snapshot"} for i, d, l, f, m, n in PESQUISAS_2T if pd.to_datetime(d).date() > DATA_1T] + WEB_2T
+    vistas = {}
+    for x in sorted(linhas, key=lambda x: x["fonte"] != "snapshot"):
+        vistas.setdefault((x["instituto"], pd.to_datetime(x["data_fim"]).strftime("%Y-%m-%d")), x)
+    linhas = sorted(vistas.values(), key=lambda x: pd.to_datetime(x["data_fim"]), reverse=True)
+    dados["media2t"] = media_ponderada_2t([dict(x, data_fim=pd.to_datetime(x["data_fim"])) for x in linhas])
+    dados["pesq2t"] = [{"i": x["instituto"], "d": f"{pd.to_datetime(x['data_fim']).day}/{pd.to_datetime(x['data_fim']).month}",
+                        "l": x["lula"], "f": x["flavio"], "m": x["margem"], "n": x["entrevistas"]} for x in linhas[:12]]
+    dados["transf"] = TRANSFERENCIA
+
+
+def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticias=None, criterio="", r1t=None) -> Path:
     SAIDA.mkdir(exist_ok=True)
     op = dict(index=False, sep=";", decimal=",", encoding="utf-8-sig")
     pesq.to_csv(SAIDA / "fato_pesquisas_nacional.csv", date_format="%Y-%m-%d", **op)
@@ -861,7 +1072,10 @@ def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticia
                              "status": f"snapshot manual de {DATA_SNAPSHOT}"}],
         "rodape": RODAPE,
     }
-    html = TEMPLATE.read_text(encoding="utf-8").replace("/*__DADOS__*/null", json.dumps(dados, ensure_ascii=False))
+    dados["fase"] = fase_atual()
+    if dados["fase"] == "2t" and r1t:
+        _aplicar_fase_2t(dados, r1t)
+    html = TEMPLATE.read_text(encoding="utf-8").replace("/*__DADOS__*/null", json.dumps(dados, ensure_ascii=False, default=str))
     destino = SAIDA / NOME_SAIDA
     destino.write_text(html, encoding="utf-8")
 
@@ -908,7 +1122,7 @@ def main() -> None:
                          "uso pessoal, não publique")
     ap.add_argument("--codigo-eleicao", help="código da eleição no TSE (ex.: 619), se a descoberta automática falhar")
     ap.add_argument("--codigo-estadual", help="código da eleição estadual no TSE (governador/senado), se a descoberta falhar")
-    ap.add_argument("--turno", type=int, default=1, choices=[1, 2])
+    ap.add_argument("--turno", type=int, default=None, choices=[1, 2], help="padrão: automático pela data")
     ap.add_argument("--so-apuracao", action="store_true",
                     help="modo ao vivo: lê só a apuração do TSE e grava apuracao.json (usado no dia da eleição)")
     ap.add_argument("--com-deputados", action="store_true", help="no modo ao vivo, relê também os deputados (mais lento)")
@@ -926,8 +1140,9 @@ def main() -> None:
     resultado = extrair_resultado(args.offline, args.codigo_eleicao, args.turno, args.codigo_estadual)
     noticias, criterio = classificar_noticias(extrair_noticias(args.offline))
     pesq, uf, gov, reg, seg, media = agregar(tratar(bruto), eleitorado)
+    r1t = resultado_1t(args.offline) if fase_atual() == "2t" else None
     agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
-    publicar(pesq, uf, gov, reg, seg, media, resultado, agora.strftime("%d/%m/%Y às %Hh%M"), noticias, criterio)
+    publicar(pesq, uf, gov, reg, seg, media, resultado, agora.strftime("%d/%m/%Y às %Hh%M"), noticias, criterio, r1t)
 
 
 if __name__ == "__main__":
