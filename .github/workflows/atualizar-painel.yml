@@ -42,7 +42,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # opcional: classifica as notícias do dia
         run: |
-          ARGS="--turno ${{ vars.TURNO || '1' }}"
+          ARGS=""; if [ -n "${{ vars.TURNO }}" ]; then ARGS="--turno ${{ vars.TURNO }}"; fi
           if [ -n "${{ vars.CODIGO_ELEICAO }}" ]; then ARGS="$ARGS --codigo-eleicao ${{ vars.CODIGO_ELEICAO }}"; fi
           if [ -n "${{ vars.CODIGO_ESTADUAL }}" ]; then ARGS="$ARGS --codigo-estadual ${{ vars.CODIGO_ESTADUAL }}"; fi
           python pipeline_eleicoes_2026.py $ARGS
