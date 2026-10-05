@@ -207,32 +207,42 @@ footer p{max-width:none}
 
 <div id="guia-pesquisas" role="tabpanel" aria-labelledby="tab-pesquisas">
 <section style="margin-top:28px">
-  <p class="sub">Média das pesquisas nacionais para presidente mais recentes, uma por instituto, votos totais.</p>
+  <h2 id="hero-tit" hidden></h2>
+  <p class="sub" id="hero-sub">Média das pesquisas nacionais para presidente mais recentes, uma por instituto, votos totais.</p>
   <div class="comparar" id="comparar" hidden>
     <label for="cmp-a">Comparar</label> <select id="cmp-a"></select> <span>×</span> <select id="cmp-b"></select>
   </div>
   <div class="cabo" id="cabo"></div>
-  <div class="panel">
-    <h3>Cada pesquisa</h3>
+  <div class="panel" id="painel-pesq">
+    <h3 id="pesq-tit">Cada pesquisa</h3>
     <div class="pesq" id="pesq"></div>
     <div class="escala" style="margin-top:6px"><span></span><div><span>30%</span><span>40%</span><span>50%</span></div><span></span></div>
     <p class="nota" id="nota-pesq"></p>
   </div>
-  <div class="panel" style="margin-top:14px">
+  <div class="panel" style="margin-top:14px" id="painel-seg2t">
     <h3 id="seg2t-tit">Cenário de 2º turno, Lula × Flávio</h3>
     <div id="seg2t"></div>
   </div>
 </section>
 
+<section aria-labelledby="t-prev1t" id="sec-prev1t" hidden>
+  <h2 id="t-prev1t">1º turno: pesquisas × urnas</h2>
+  <p class="sub">Disputa entre Lula e Flávio, só com os votos dos dois, para comparar pesquisa (que tem indecisos) e urna na mesma base.</p>
+  <div class="todos-grid">
+    <div class="panel compacto" id="prev1t"></div>
+    <div class="panel compacto" id="prev1t-tab"></div>
+  </div>
+</section>
+
 <section aria-labelledby="t-todos">
   <h2 id="t-todos">Todos os candidatos</h2>
-  <p class="sub">1º turno, votos totais, com todos os candidatos que pontuaram em cada pesquisa. Os demais candidatos não chegaram a 1%.</p>
+  <p class="sub" id="todos-sub">1º turno, votos totais, com todos os candidatos que pontuaram em cada pesquisa. Os demais candidatos não chegaram a 1%.</p>
   <div class="chips" id="chips" role="group" aria-label="Escolha os candidatos" hidden></div>
   <div class="todos-grid">
     <div class="panel compacto" id="medias"></div>
     <div class="panel compacto">
-      <h3>2º turno contra outros adversários</h3>
-      <p class="sub">Lula contra cada um dos principais candidatos.</p>
+      <h3 id="cen2t-tit">2º turno contra outros adversários</h3>
+      <p class="sub" id="cen2t-sub">Lula contra cada um dos principais candidatos.</p>
       <div id="cen2t"></div>
     </div>
   </div>
@@ -702,6 +712,114 @@ if(D.publico){
 }
 
 PRONTO=true; renderEvolucao(); renderRejAprov();
+if(D.fase==="2t") aplicarFase2t();
+
+
+// ===================== Fase de 2º turno (a partir de 5/10) =====================
+function aplicarFase2t(){
+  const R1=D.r1t; if(!R1) return;
+  const corB={F:"var(--flavio)",L:"var(--lula)",N:"var(--neutro)"};
+  const barras=(id,its)=>$(id).innerHTML=its.map(([n,v,c])=>`<div class="bar-row"><span>${n}</span><div class="bar-bg"><i style="width:${v}%;background:${corB[c]}"></i></div><span class="v">${fmt(v)}%</span></div>`).join("");
+  const P2=D.pesq2t||[], M2=D.media2t, cl="var(--lula)", cf="var(--flavio)";
+  const vv=x=>Number(x).toLocaleString("pt-BR");
+  // ---- topo: 2º turno Lula × Flávio
+  $("hero-tit").hidden=false; $("hero-tit").textContent="2º turno: Lula × Flávio";
+  $("comparar").hidden=true; $("painel-seg2t").hidden=true;
+  const ref=`No 1º turno, nas urnas: <b class="flavio">Flávio ${fmt(R1.flavio_pct)}%</b> × <b class="lula">Lula ${fmt(R1.lula_pct)}%</b> dos votos válidos, diferença de ${vv(R1.flavio_votos-R1.lula_votos)} votos.`;
+  if(M2&&P2.length){
+    $("hero-sub").textContent=`Média ponderada das pesquisas de 2º turno feitas depois de 4/10: a mais recente de cada instituto, com mais peso para as mais novas e para as amostras maiores.`;
+    const dif=Math.round((M2.lula-M2.flavio)*10)/10;
+    $("cabo").innerHTML=`<div class="cabo-nums"><div class="lula"><span class="num">${fmt(M2.lula)}%</span><small>Lula (PT)</small></div><div class="flavio" style="text-align:right"><span class="num">${fmt(M2.flavio)}%</span><small>Flávio Bolsonaro (PL)</small></div></div>
+      <div class="barra"><i style="width:${M2.lula}%;background:${cl}"></i><i style="flex:1"></i><i style="width:${M2.flavio}%;background:${cf}"></i><span class="meio"></span></div>
+      <p class="nota">Média de ${M2.n} pesquisa${M2.n===1?"":"s"} (${Object.entries(M2.pesos).map(([i,w])=>`${i} ${w}%`).join(", ")} do peso). Diferença de ${fmt(Math.abs(dif))} pontos para ${dif>=0?"Lula":"Flávio"}. ${ref}</p>`;
+    $("pesq-tit").textContent="Pesquisas de 2º turno";
+    const x=v=>Math.max(0,Math.min(100,(v-30)/30*100));
+    $("pesq").innerHTML=P2.map(p=>{const d=Math.round((p.l-p.f)*10)/10,emp=Math.abs(d)<=2*(p.m||2);
+      return `<div class="linha"><span>${p.i}<br><span class="sub" style="font-size:.8rem">${p.d}${p.n?`, ${vv(p.n)} entrevistas`:""}</span></span><div class="trilho"><span class="seg" style="left:${x(Math.min(p.l,p.f))}%;width:${Math.abs(x(p.l)-x(p.f))}%"></span><span class="dot" style="left:${x(p.f)}%;background:${cf}"></span><span class="dot" style="left:${x(p.l)}%;background:${cl}"></span></div><span class="dif ${d>0?"lula":d<0?"flavio":""}">${d===0?"Empate":(d>0?"Lula":"Flávio")+" +"+fmt(Math.abs(d))}${emp?"*":""}</span></div>`}).join("");
+    document.querySelectorAll(".escala div").forEach(e=>e.innerHTML="<span>30%</span><span>45%</span><span>60%</span>");
+    $("nota-pesq").textContent="* Diferença dentro da margem de erro somada: empate técnico.";
+  } else {
+    $("hero-sub").textContent="Ponto de partida: o resultado do 1º turno. As pesquisas de 2º turno entram aqui assim que forem divulgadas, com média ponderada (mais peso para as mais recentes e para as amostras maiores).";
+    $("cabo").innerHTML=`<div class="cabo-nums"><div class="lula"><span class="num">${fmt(R1.lula_pct)}%</span><small>Lula (PT), ${vv(R1.lula_votos)} votos</small></div><div class="flavio" style="text-align:right"><span class="num">${fmt(R1.flavio_pct)}%</span><small>Flávio Bolsonaro (PL), ${vv(R1.flavio_votos)} votos</small></div></div>
+      <div class="barra"><i style="width:${R1.lula_pct}%;background:${cl}"></i><i style="flex:1"></i><i style="width:${R1.flavio_pct}%;background:${cf}"></i><span class="meio"></span></div>
+      <p class="nota">Resultado do 1º turno, votos válidos (fonte: ${R1.fonte||"TSE"}). Ainda não há pesquisas de 2º turno divulgadas.</p>`;
+    $("painel-pesq").hidden=true;
+  }
+  // ---- 1º turno: pesquisas × urnas
+  const real=R1.lula_pct/(R1.lula_pct+R1.flavio_pct)*100;
+  const ult=D.pesquisas.filter(p=>p.l&&p.f).map(p=>({i:p.i,d:p.d,base:p.base,l:p.l/(p.l+p.f)*100}));
+  const medP=D.media.lula/(D.media.lula+D.media.flavio)*100, err=real-medP;
+  $("sec-prev1t").hidden=false;
+  $("prev1t").innerHTML=`<h3>Média das pesquisas × urnas</h3>
+    <div class="duelo"><span>Pesquisas (média final)</span><span><b class="lula">Lula ${fmt(medP.toFixed(1))}%</b> × <b class="flavio">${fmt((100-medP).toFixed(1))}% Flávio</b></span></div>
+    <div class="duelo"><span>Urnas</span><span><b class="lula">Lula ${fmt(real.toFixed(1))}%</b> × <b class="flavio">${fmt((100-real).toFixed(1))}% Flávio</b></span></div>
+    <p class="nota">Na disputa entre os dois, as pesquisas ${err<0?"subestimaram Flávio":"subestimaram Lula"} em ${fmt(Math.abs(err).toFixed(1))} pontos. Vale lembrar disso ao ler as pesquisas do 2º turno.</p>`;
+  $("prev1t-tab").innerHTML=`<h3>Última pesquisa de cada instituto</h3>`+ult.map(p=>{const e=real-p.l;return `<div class="duelo"><span>${p.i}${p.base!=="total"?"*":""} <span class="sub">${p.d}</span></span><span><b class="lula">Lula ${fmt(p.l.toFixed(1))}%</b> <span class="sub">(urna ${fmt(real.toFixed(1))}%, erro ${e>0?"+":""}${fmt(e.toFixed(1))})</span></span></div>`}).join("")+`<p class="nota">Percentual de Lula na disputa só entre os dois. * Quase sem indecisos.</p>`;
+  // ---- Para onde vão os votos
+  $("t-todos").textContent="Para onde vão os votos"; $("chips").hidden=true;
+  $("todos-sub").textContent="Votos que Lula e Flávio precisam disputar no 2º turno: os dos candidatos eliminados, os brancos e nulos e quem não foi votar.";
+  const O=R1.outros||[], somaO=O.reduce((a,o)=>a+o[2],0), mxO=Math.max(...O.map(o=>o[2]),1), TR=D.transf||{};
+  $("medias").innerHTML=`<h3>Candidatos eliminados</h3><p class="sub">${vv(somaO)} votos válidos no 1º turno (${fmt((somaO/R1.validos*100).toFixed(1))}%)</p>`+
+    O.filter(o=>o[3]>=0.05).map(o=>`<div class="bar-row"><span>${o[0]}</span><div class="bar-bg"><i style="width:${o[2]/mxO*100}%;background:${corC(o[0])}"></i></div><span class="v">${fmt(o[3])}%</span></div>`).join("")+
+    `<p class="nota">${Object.keys(TR).length?Object.entries(TR).map(([n,x])=>`Eleitores de ${n}: Lula ${x.Lula}%, Flávio ${x["Flávio"]}% (${x.fonte})`).join(". ")+".":"Quando as pesquisas perguntarem em quem os eleitores de cada eliminado vão votar, a divisão aparece aqui."}</p>`;
+  $("cen2t-tit").textContent="Fora da disputa"; $("cen2t-sub").textContent="Quem não escolheu nenhum candidato no 1º turno.";
+  $("cen2t").innerHTML=[["Abstenção",R1.abstencao,`${fmt(R1.abstencao_pct)}% do eleitorado`],["Votos nulos",R1.nulos,""],["Votos brancos",R1.brancos,""]].map(([n,v,s])=>`<div class="duelo"><span>${n}${s?` <span class="sub">${s}</span>`:""}</span><b>${vv(v)}</b></div>`).join("")+
+    `<p class="nota">A diferença entre Flávio e Lula no 1º turno foi de ${vv(R1.flavio_votos-R1.lula_votos)} votos.</p>`;
+  // ---- mapa: urnas do 1º turno, saldo real, 2022 e governadores em 2º turno
+  for(const k of Object.keys(MODOS)) delete MODOS[k];
+  const G2=Object.fromEntries((D.gov2t||[]).map(g=>[g.uf,g]));
+  Object.assign(MODOS,{
+    u1t:{rot:"1º turno (urnas)",v:u=>u.l26,cats:{L:["Lula venceu","var(--lula)"],F:["Flávio venceu","var(--flavio)"]}},
+    saldo:{rot:"Saldo de votos",cats:{L:["Saldo para Lula","var(--lula)"],F:["Saldo para Flávio","var(--flavio)"],"?":["Sem dado","var(--vazio)"]}},
+    gov2t:{rot:"Governador: 2º turno",v:u=>G2[u.uf]?"E":"N",cats:{E:["Tem 2º turno","var(--empate)"],N:["Decidido no 1º turno","var(--neutro)"]}},
+    p22:{rot:"Resultado 2022",v:u=>u.v22,cats:{L:["Lula venceu","var(--lula)"],B:["Bolsonaro venceu","var(--flavio)"]}}
+  });
+  modo="u1t"; sel=null;
+  $("abas").innerHTML=Object.entries(MODOS).map(([k,m])=>`<button data-modo="${k}">${m.rot}</button>`).join("");
+  const nL=D.ufs.filter(u=>u.l26==="L").length;
+  geral=function(){
+    const tot=D.ufs.reduce((a,u)=>a+(u.saldo1||0),0);
+    const H={u1t:`<h3>Brasil, 1º turno</h3><p><span class="num flavio">${fmt(R1.flavio_pct)}%</span> &nbsp;×&nbsp; <span class="num lula">${fmt(R1.lula_pct)}%</span><br><span class="sub">Flávio × Lula, votos válidos</span></p><p>Flávio venceu em ${D.ufs.length-nL} UFs e Lula em ${nL}.</p>`,
+      saldo:`<h3>Brasil, saldo real</h3><p><span class="num ${tot>0?"lula":"flavio"}">${mi(tot)}</span><br><span class="sub">Soma dos saldos estaduais para ${tot>0?"Lula":"Flávio"} no 1º turno</span></p>`,
+      gov2t:`<h3>Governadores</h3><p>${(D.gov2t||[]).length} UFs decidem o governo no 2º turno: ${(D.gov2t||[]).map(g=>g.uf).join(", ")}.</p>`,
+      p22:`<h3>Brasil, 2º turno de 2022</h3><p><span class="num lula">50,9%</span> &nbsp;×&nbsp; <span class="num flavio">49,1%</span><br><span class="sub">Lula × Bolsonaro</span></p>`};
+    $("detalhe").innerHTML=(H[modo]||"")+`<p class="sub">Toque em um estado para ver os números dele.</p>`;
+  };
+  detalhe=function(u){
+    let h=`<button class="voltar" onclick="voltar()">← Ver Brasil inteiro</button><h3>${u.uf}</h3>`;
+    h+=`<p><span class="num lula">${fmt(u.l1)}%</span> &nbsp;×&nbsp; <span class="num flavio">${fmt(u.f1)}%</span><br><span class="sub">Lula × Flávio, 1º turno nas urnas</span></p>`;
+    h+=`<p>Saldo: <b class="${u.saldo1>=0?"lula":"flavio"}">${mi(u.saldo1)} ${u.saldo1>=0?"Lula":"Flávio"}</b><br>Eleitorado: ${milhoes(u.eleit)}<br>Resultado 2022: <b>${T[u.v22]}</b></p>`;
+    const g=G2[u.uf]; if(g) h+=`<p>Governador, 2º turno: <b>${g.a.nm}</b> (${g.a.p}, ${fmt(g.a.pct)}%) × <b>${g.b.nm}</b> (${g.b.p}, ${fmt(g.b.pct)}%)</p>`;
+    $("detalhe").innerHTML=h;
+  };
+  render();
+  // ---- saldo e regiões com os votos reais
+  $("sub-saldo").textContent="Saldo real de votos de cada estado no 1º turno (votos de Lula menos votos de Flávio). É o mapa que os dois candidatos têm para virar ou ampliar no 2º turno.";
+  const rk=D.ufs.filter(u=>u.saldo1!=null),tot=rk.reduce((a,u)=>a+u.saldo1,0),top=[...rk].sort((a,b)=>b.saldo1-a.saldo1);
+  $("nota-saldo").textContent=`Somando os estados, o saldo é ${mi(tot)} para ${tot>0?"Lula":"Flávio"} (o voto do exterior fica de fora). Maior saldo de Lula: ${top[0].uf} (${mi(top[0].saldo1)}); maior de Flávio: ${top[top.length-1].uf} (${mi(top[top.length-1].saldo1)}).`;
+  $("sub-reg").textContent="Votos reais do 1º turno por região.";
+  $("regioes").innerHTML=[...D.reg].sort((a,b)=>b[1]-a[1]).map(([n,v,l,f])=>{const o=v-l-f,sd=l-f;
+    return `<div class="reg"><div class="top"><b>${n}</b><small>${milhoes(v)} votos válidos, saldo <b class="${sd>0?"lula":"flavio"}">${mi(sd)} ${sd>0?"Lula":"Flávio"}</b></small></div>
+    <div class="pilha"><i style="width:${l/v*100}%;background:var(--lula)"></i><i style="width:${f/v*100}%;background:var(--flavio)"></i></div>
+    <small><span class="lula">Lula ${milhoes(l)}</span>, <span class="flavio">Flávio ${milhoes(f)}</span>, outros candidatos ${milhoes(o)}</small></div>`}).join("");
+  // ---- governadores em 2º turno
+  const camp={L:["aliado de Lula","var(--lula)"],F:["aliado de Flávio","var(--flavio)"],N:["fora das alianças","var(--neutro)"]};
+  $("t-eleitos").textContent="Governadores no 2º turno";
+  const cand=c=>`<div class="cand"><span><b style="color:${camp[c.campo][1]}">${c.nm}</b> <span class="sub">${c.p}, ${camp[c.campo][0]}</span></span><span>${fmt(c.pct)}%</span></div>`;
+  const G=D.gov2t||[];
+  $("gov-L").innerHTML=G.slice(0,Math.ceil(G.length/2)).map(g=>`<div class="grupo">${g.uf}</div>${cand(g.a)}${cand(g.b)}`).join("");
+  $("gov-F").innerHTML=G.slice(Math.ceil(G.length/2)).map(g=>`<div class="grupo">${g.uf}</div>${cand(g.a)}${cand(g.b)}`).join("")+`<p class="nota">Percentuais do 1º turno (votos válidos).</p>`;
+  document.querySelectorAll("#t-eleitos ~ .campos h3").forEach(h=>h.textContent="");
+  const pN=$("gov-N"); if(pN&&pN.parentElement) pN.parentElement.hidden=true;
+  const pS=$("senado"); if(pS&&pS.parentElement) pS.parentElement.hidden=true;
+  // ---- DF
+  const df=D.ufs.find(u=>u.uf==="DF"), gdf=G2.DF;
+  if(df){$("df-pres-fonte").textContent="urnas, 1º turno"; barras("df-pres",[["Flávio",df.f1,"F"],["Lula",df.l1,"L"]]);
+    $("df-2t").innerHTML=`<div class="duelo"><span>Saldo no DF</span><span><b class="flavio">${mi(df.saldo1)} Flávio</b></span></div>`; $("df-rej").textContent="";}
+  if(gdf){$("df-gov-fonte").textContent="1º turno; 2º turno em 25/10"; barras("df-gov",[[gdf.a.nm,gdf.a.pct,gdf.a.campo],[gdf.b.nm,gdf.b.pct,gdf.b.campo]]);
+    $("df-gov-nota").textContent=`${gdf.a.nm} e ${gdf.b.nm} disputam o 2º turno no dia 25.`;}
+  const sen=$("df-sen"); if(sen&&sen.parentElement){ $("df-sen-fonte").textContent=""; sen.innerHTML=""; $("df-sen-nota").textContent="Senado: as duas vagas foram decididas no 1º turno; veja os eleitos na guia Apuração."; }
+}
 
 // ===================== Guias =====================
 function abrirGuia(g){
@@ -731,7 +849,7 @@ function renderApuracao(){
     <p class="nota">Votos válidos. ${lider} à frente por ${votos(Math.abs(dv))} votos. A linha do meio marca 50%: quem passar dela com mais da metade dos válidos vence no 1º turno.</p>`;
   const mx=Math.max(...(R.cands||[]).map(c=>c.pct),1);
   $("ap-cands").innerHTML=(R.cands||[]).map(c=>{const cor=/LULA/i.test(c.nm)?"var(--lula)":/BOLSONARO/i.test(c.nm)?"var(--flavio)":"var(--neutro)";
-    return `<div class="bar-row"><span>${c.nm}${c.eleito?'<span class="eleito">eleito(a)</span>':""}</span><div class="bar-bg"><i style="width:${c.pct/mx*100}%;background:${cor}"></i></div><span class="v">${pct(c.pct)}%</span></div>`}).join("");
+    return `<div class="bar-row"><span>${c.nm}${c.eleito?'<span class="eleito">eleito(a)</span>':""}${c.segundo_turno?'<span class="eleito" style="color:var(--empate)">2º turno</span>':""}</span><div class="bar-bg"><i style="width:${c.pct/mx*100}%;background:${cor}"></i></div><span class="v">${pct(c.pct)}%</span></div>`}).join("");
   renderApMapa(); renderComparacao(); renderApEstados(); renderApDeputados();
 }
 function corUF(r){ if(!r) return ["var(--vazio)",true];
@@ -797,7 +915,7 @@ function renderApEstados(){
   const bloco=(x,tit,nota)=>{if(!x||!x.cands.length) return `<h3 style="margin-top:14px">${tit}</h3><p class="sub">Sem dados ainda.</p>`;
     const mx=Math.max(...x.cands.map(c=>c.pct),1);
     return `<h3 style="margin-top:14px">${tit} <span class="tag">${pct(x.pst)}% das seções</span></h3>`+x.cands.map((c,i)=>{const k=campoDe(estSel,c.nm);
-      return `<div class="bar-row"><span>${c.nm}${c.eleito?'<span class="eleito">eleito(a)</span>':""}</span><div class="bar-bg"><i style="width:${c.pct/mx*100}%;background:${tit==="Governador"?cor[k]:"var(--neutro)"}"></i></div><span class="v">${pct(c.pct)}%</span></div>`}).join("")+(nota?`<p class="nota">${nota}</p>`:"");};
+      return `<div class="bar-row"><span>${c.nm}${c.eleito?'<span class="eleito">eleito(a)</span>':""}${c.segundo_turno?'<span class="eleito" style="color:var(--empate)">2º turno</span>':""}</span><div class="bar-bg"><i style="width:${c.pct/mx*100}%;background:${tit==="Governador"?cor[k]:"var(--neutro)"}"></i></div><span class="v">${pct(c.pct)}%</span></div>`}).join("")+(nota?`<p class="nota">${nota}</p>`:"");};
   $("ap-est-detalhe").innerHTML=`<h3>${estSel}</h3>`+bloco(s.governador,"Governador","Vence no 1º turno quem tiver mais da metade dos votos válidos; senão, os dois primeiros vão ao 2º turno em 25/10.")+
     bloco(s.senador,"Senado","São duas vagas: os dois mais votados são eleitos, sem 2º turno.");
 }
@@ -827,10 +945,16 @@ function renderApDeputados(){
 }
 // Ao vivo: o navegador tenta ler o TSE direto a cada 30 segundos (se o TSE bloquear, fica com o dado do painel)
 async function lerTSE(cod,uf,cargo){
-  const c6=String(cod).padStart(6,"0"),r=await fetch(`${AP.tse.base}/ele2026/${cod}/dados-simplificados/${uf}/${uf}-c${String(cargo).padStart(4,"0")}-e${c6}-r.json`,{cache:"no-store"});
-  if(!r.ok) throw new Error(r.status);const j=await r.json(),n=v=>parseFloat(String(v||"0").replace(",","."));
-  const cands=(j.cand||[]).map(c=>({nm:String(c.nm||"").toLowerCase().split(/\s+/).map(w=>["da","de","do","das","dos","e"].includes(w)?w:w.charAt(0).toUpperCase()+w.slice(1)).join(" "),votos:+c.vap||0,pct:n(c.pvap),eleito:String(c.e||"").toLowerCase()==="s"})).sort((a,b)=>b.votos-a.votos);
-  return {pst:n(j.pst),hora:j.hg||"",cands};
+  // Formato 2026 do TSE (EA20 unificado): /ele2026/{eleição}/dados/{uf}/{uf}-c{cargo}-e{eleição}-u.json
+  const c6=String(cod).padStart(6,"0"),r=await fetch(`${AP.tse.base}/ele2026/${cod}/dados/${uf}/${uf}-c${String(cargo).padStart(4,"0")}-e${c6}-u.json`,{cache:"no-store"});
+  if(!r.ok) throw new Error(r.status);
+  const j=await r.json(),n=v=>{const x=parseFloat(String(v??"0").replace(/\./g,"").replace(",","."));return isFinite(x)?x:0;};
+  const nome=s=>String(s||"").toLowerCase().split(/\s+/).map(w=>["da","de","do","das","dos","e"].includes(w)?w:w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
+  const cands=[];
+  (((j.carg||[])[0]||{}).agr||[]).forEach(a=>(a.par||[]).forEach(p=>(p.cand||[]).forEach(c=>{const ok=!c.dvt||String(c.dvt).startsWith("Válido"),st=String(c.st||"").toLowerCase();
+    cands.push({nm:nome(c.nmu||c.nm),partido:p.sg,votos:n(c.vap),pct:ok?n(c.pvap):0,eleito:(String(c.e||"").toLowerCase()==="s"||st.includes("eleito"))&&!st.includes("não eleito")&&!st.includes("turno"),segundo_turno:st.includes("turno")});})));
+  cands.sort((a,b)=>b.votos-a.votos);
+  return {pst:n((j.s||{}).pst),hora:j.ht||j.hg||"",cands};
 }
 function lf(c){const l=c.find(x=>/LULA/i.test(x.nm)),f=c.find(x=>/BOLSONARO/i.test(x.nm));return l&&f?{lula_pct:l.pct,flavio_pct:f.pct,lula_votos:l.votos,flavio_votos:f.votos}:null;}
 let ciclos=0;
