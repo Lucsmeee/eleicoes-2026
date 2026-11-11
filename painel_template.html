@@ -937,13 +937,13 @@ function renderApEstados(){
     if(apCargo==="gov"){const x=E[u.uf]&&E[u.uf].governador;
       if(x&&x.cands.length){const w=x.cands[0],k=campoDe(u.uf,w.nm,w.partido);c=cor[k];claro=false;rot=`${w.nm} ${w.eleito?"eleito(a)":"à frente"}${x.turno===2?" no 2º turno":""}`;}}
     else{const v=vagas(u.uf);
-      if(v.length){const a=cor[v[0].k],z=cor[(v[1]||v[0]).k];c=a===z?a:`linear-gradient(90deg,${a} 0 50%,${z} 50% 100%)`;claro=false;rot=v.map(x=>`${x.nm} (${x.partido})`).join(" e ");}}
+      if(v.length){const ks=[...new Set(v.map(x=>x.k))];const k=ks.length===1?ks[0]:"D";c=cor[k];claro=false;rot=v.map(x=>`${x.nm} (${x.partido})`).join(" e ");}}
     b.className="uf"+(u.uf===estSel?" sel":"")+(claro?" claro":"");b.style.gridColumn=POS[u.uf][0]+1;b.style.gridRow=POS[u.uf][1]+1;b.style.background=c;
     b.textContent=u.uf;b.setAttribute("aria-label",`${u.uf}: ${rot}`);b.title=rot;b.setAttribute("aria-pressed",u.uf===estSel);b.onclick=()=>{estSel=estSel===u.uf?null:u.uf;renderApEstados();};g.appendChild(b);});
   const verbo=final?"eleito":"à frente";
   $("ap-gov-legenda").innerHTML=apCargo==="gov"
     ?`<span><b style="background:var(--lula)"></b>Aliado de Lula ${verbo}</span><span><b style="background:var(--flavio)"></b>Aliado de Flávio ${verbo}</span><span><b style="background:var(--neutro)"></b>Fora das alianças</span><span><b style="background:var(--vazio)"></b>Sem dados</span>`
-    :`<span><b style="background:var(--lula)"></b>Aliado de Lula</span><span><b style="background:var(--flavio)"></b>Aliado de Flávio</span><span><b style="background:var(--neutro)"></b>Outros</span><span><b style="background:var(--vazio)"></b>Sem dados</span><span>Cada metade do quadrado é uma das duas vagas.</span>`;
+    :`<span><b style="background:var(--lula)"></b>As duas vagas com aliados de Lula</span><span><b style="background:var(--flavio)"></b>As duas com aliados de Flávio</span><span><b style="background:var(--empate)"></b>Vagas divididas</span><span><b style="background:var(--neutro)"></b>Outros</span><span><b style="background:var(--vazio)"></b>Sem dados</span>`;
   $("ap-gov-placar").innerHTML=apCargo==="gov"
     ?`<div><span class="num lula">${cont.L}</span><br><small>Governadores aliados de Lula${final?"":" à frente"}</small></div><div><span class="num flavio">${cont.F}</span><br><small>Governadores aliados de Flávio${final?"":" à frente"}</small></div><div><span class="num">${cont.N}</span><br><small>Fora das alianças</small></div>`
     :`<div><span class="num lula">${sen.L}</span><br><small>Senadores aliados de Lula</small></div><div><span class="num flavio">${sen.F}</span><br><small>Senadores aliados de Flávio</small></div><div><span class="num">${sen.N}</span><br><small>Outros</small></div>`;
