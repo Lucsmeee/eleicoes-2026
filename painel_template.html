@@ -910,7 +910,7 @@ function campoDe(uf,nm,partido,soPartido){
   }
   return campoPartido(partido);
 }
-let estSel="DF", apCargo="gov";
+let estSel=null, apCargo="gov";   // estSel=null: panorama geral do Brasil
 function renderApEstados(){
   const E=AP.estados||{};
   $("ap-est-sec").hidden=!Object.keys(E).length; if(!Object.keys(E).length) return;
@@ -930,7 +930,7 @@ function renderApEstados(){
     else{const v=vagas(u.uf);
       if(v.length){const ks=[...new Set(v.map(x=>x.k))];const k=ks.length===1?ks[0]:"D";c=cor[k];claro=false;rot=v.map(x=>`${x.nm} (${x.partido})`).join(" e ");}}
     b.className="uf"+(u.uf===estSel?" sel":"")+(claro?" claro":"");b.style.gridColumn=POS[u.uf][0]+1;b.style.gridRow=POS[u.uf][1]+1;b.style.background=c;
-    b.textContent=u.uf;b.setAttribute("aria-label",`${u.uf}: ${rot}`);b.title=rot;b.onclick=()=>{estSel=u.uf;renderApEstados();};g.appendChild(b);});
+    b.textContent=u.uf;b.setAttribute("aria-label",`${u.uf}: ${rot}`);b.title=rot;b.setAttribute("aria-pressed",u.uf===estSel);b.onclick=()=>{estSel=estSel===u.uf?null:u.uf;renderApEstados();};g.appendChild(b);});
   const verbo=final?"eleito":"à frente";
   $("ap-gov-legenda").innerHTML=apCargo==="gov"
     ?`<span><b style="background:var(--lula)"></b>Aliado de Lula ${verbo}</span><span><b style="background:var(--flavio)"></b>Aliado de Flávio ${verbo}</span><span><b style="background:var(--neutro)"></b>Fora das alianças</span><span><b style="background:var(--vazio)"></b>Sem dados</span>`
@@ -939,8 +939,9 @@ function renderApEstados(){
     ?`<div><span class="num lula">${cont.L}</span><br><small>Governadores aliados de Lula${final?"":" à frente"}</small></div><div><span class="num flavio">${cont.F}</span><br><small>Governadores aliados de Flávio${final?"":" à frente"}</small></div><div><span class="num">${cont.N}</span><br><small>Fora das alianças</small></div>`
     :`<div><span class="num lula">${sen.L}</span><br><small>Senadores PT/PCdoB/PV</small></div><div><span class="num flavio">${sen.F}</span><br><small>Senadores do PL</small></div><div><span class="num">${sen.N}</span><br><small>Outros partidos</small></div>`;
   $("ap-est-sub").textContent=apCargo==="gov"
-    ?`Cor pelo alinhamento de quem ${final?"venceu":"lidera"} para governador em cada estado (${eleitos} de 27 já eleitos). Toque em um estado para ver governador e as duas vagas do Senado.`
-    :`Cor pelo partido das ${senEl||54} cadeiras ${senEl?"eleitas":"em disputa"} (duas por estado): federação PT/PCdoB/PV, PL ou outros. Toque em um estado para ver os votos.`;
+    ?`Cor pelo alinhamento de quem ${final?"venceu":"lidera"} para governador em cada estado (${eleitos} de 27 já eleitos). Toque em um estado para ver governador e as duas vagas do Senado; toque de novo para voltar ao panorama geral.`
+    :`Cor pelo partido das ${senEl||54} cadeiras ${senEl?"eleitas":"em disputa"} (duas por estado): federação PT/PCdoB/PV, PL ou outros. Toque em um estado para ver os votos; toque de novo para voltar ao panorama geral.`;
+  if(!estSel){ $("ap-est-detalhe").innerHTML=panoramaEstados(E,cor,vagas,final); return; }
   const s=E[estSel]||{};
   const bloco=(x,tit,nota,soPartido)=>{if(!x||!x.cands.length) return `<h3 style="margin-top:14px">${tit}</h3><p class="sub">Sem dados ainda.</p>`;
     const mx=Math.max(...x.cands.map(c=>c.pct),1);
@@ -950,7 +951,28 @@ function renderApEstados(){
   $("ap-est-detalhe").innerHTML=`<h3>${estSel}</h3>`+
     bloco(gv,dois?"Governador, 2º turno":"Governador",dois?"Decidido no 2º turno, em 25/10.":"Vence no 1º turno quem tiver mais da metade dos votos válidos; senão, os dois primeiros vão ao 2º turno.")+
     (dois?bloco(s.governador_1t,"Governador, 1º turno",""):"")+
-    bloco(s.senador,"Senado","São duas vagas: os dois mais votados são eleitos, sem 2º turno. Cor pelo partido.",true);
+    bloco(s.senador,"Senado","São duas vagas: os dois mais votados são eleitos, sem 2º turno. Cor pelo partido.",true)+
+    `<p class="nota"><a href="#" onclick="estSel=null;renderApEstados();return false">Voltar ao panorama geral</a></p>`;
+}
+// Panorama geral (nenhum estado marcado): quem venceu em cada UF, agrupado pela cor do mapa
+function panoramaEstados(E,cor,vagas,final){
+  const chip=(k,txt)=>`<span style="display:inline-block;margin:0 6px 6px 0;padding:3px 9px;border-radius:999px;background:${cor[k]};color:#fff;font-size:.85rem">${txt}</span>`;
+  if(apCargo==="gov"){
+    const grupos={L:[],F:[],N:[]};
+    D.ufs.forEach(u=>{const x=E[u.uf]&&E[u.uf].governador; if(!x||!x.cands.length) return; const w=x.cands[0];
+      grupos[campoDe(u.uf,w.nm,w.partido)].push(`<b>${u.uf}</b> ${w.nm} (${w.partido})${x.turno===2?" · 2º turno":""}`);});
+    const nomes={L:"Aliados de Lula",F:"Aliados de Flávio",N:"Fora das alianças"};
+    const n2=D.ufs.filter(u=>E[u.uf]&&E[u.uf].governador&&E[u.uf].governador.turno===2).length;
+    return `<h3>Brasil, governadores ${final?"eleitos":"à frente"}</h3><p class="sub">${27-n2} decididos no 1º turno e ${n2} no 2º turno. Toque em um estado para ver os votos.</p>`+
+      ["L","F","N"].map(k=>`<h3 style="margin-top:14px">${nomes[k]} <span class="tag">${grupos[k].length}</span></h3><div>${grupos[k].map(t=>chip(k,t)).join("")||'<span class="sub">nenhum</span>'}</div>`).join("")+
+      `<p class="nota">Alinhamento pela lista de candidatos apoiados por Lula ou por Flávio; quem não está na lista é classificado pelo partido (federação PT/PCdoB/PV ou PL).</p>`;
+  }
+  const porPartido={}; let tot=0;
+  D.ufs.forEach(u=>vagas(u.uf).forEach(c=>{const y=porPartido[c.partido]=porPartido[c.partido]||{p:c.partido,n:0,k:c.k,ufs:[]};y.n++;y.ufs.push(u.uf);tot++;}));
+  const lista=Object.values(porPartido).sort((a,b)=>b.n-a.n||a.p.localeCompare(b.p)), mx=Math.max(1,...lista.map(x=>x.n));
+  return `<h3>Brasil, Senado</h3><p class="sub">${tot} cadeiras ${final?"eleitas":"em disputa"}, por partido. Toque em um estado para ver os votos.</p>`+
+    lista.map(x=>`<div class="bar-row"><span>${x.p} <span class="sub">${[...new Set(x.ufs)].map(u=>x.ufs.filter(v=>v===u).length>1?u+" ×2":u).join(", ")}</span></span><div class="bar-bg"><i style="width:${x.n/mx*100}%;background:${cor[x.k]}"></i></div><span class="v">${x.n}</span></div>`).join("")+
+    `<p class="nota">Cor pelo partido: vermelho para a federação PT/PCdoB/PV, azul para o PL e cinza para os demais.</p>`;
 }
 
 let casa="dep_federal", depUF="DF";
