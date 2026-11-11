@@ -53,12 +53,12 @@ jobs:
           cp saida/painel_eleicoes_2026.html site/index.html
           cp saida/*.csv site/
 
-      - name: Guardar cache do eleitorado (evita baixar o arquivo grande do TSE toda vez)
+      - name: Guardar cache do eleitorado e a apuração final (a página lê apuracao.json do repositório)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add cache/ 2>/dev/null || true
-          git diff --cached --quiet || (git commit -m "Cache do eleitorado TSE" && git pull --rebase && git push)
+          git add cache/ apuracao.json 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "Cache do eleitorado TSE e apuração final" && git pull --rebase && git push)
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

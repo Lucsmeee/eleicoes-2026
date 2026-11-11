@@ -393,7 +393,11 @@ footer p{max-width:none}
     </section>
     <section aria-labelledby="t-ap-est" id="ap-est-sec">
       <h2 id="t-ap-est">Governadores e Senado</h2>
-      <p class="sub">Cor pelo alinhamento de quem lidera a disputa para governador em cada estado. Toque em um estado para ver governador e as duas vagas do Senado.</p>
+      <p class="sub" id="ap-est-sub">Cor pelo alinhamento de quem venceu ou lidera em cada estado. Toque em um estado para ver governador e as duas vagas do Senado.</p>
+      <div class="abas" role="group" aria-label="Escolha o cargo do mapa">
+        <button data-apcargo="gov" aria-pressed="true">Governador</button>
+        <button data-apcargo="sen" aria-pressed="false">Senado</button>
+      </div>
       <div class="mapa-area">
         <div><div class="grade" id="ap-gov-grade"></div><div class="legenda" id="ap-gov-legenda"></div></div>
         <div><div class="placar" id="ap-gov-placar"></div><div class="panel detalhe" id="ap-est-detalhe"></div></div>
@@ -894,30 +898,59 @@ function renderComparacao(){
 }
 const semAcento=s=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const GENERICOS=["professora","professor","delegado","delegada","doutor","doutora","coronel","capitao","pastor","senador","deputado"];
-function campoDe(uf,nm){ // casa o nome da urna com a lista de candidatos alinhados (por sobrenome/apelido)
-  const tk=semAcento(nm).split(/[\s.]+/).filter(w=>w.length>=4&&!GENERICOS.includes(w));
-  const g=D.gov.find(x=>x[0]===uf&&semAcento(x[1]).split(/[\s.]+/).some(w=>tk.includes(w)));
-  return g?g[3]:"N";
+// Alinhamento: primeiro pela lista de candidatos a governador alinhados (por sobrenome/apelido);
+// quem não está na lista (inclusive todos os do Senado) é classificado pelo partido:
+// federação PT/PCdoB/PV = aliado de Lula, PL = aliado de Flávio, demais = fora das alianças.
+function campoPartido(p){ const s=String(p||"").toUpperCase(); if(/(^|\/)(PT|PC ?DO ?B|PV)(\/|$)/.test(s)) return "L"; if(/(^|\/)PL(\/|$)/.test(s)) return "F"; return "N"; }
+function campoDe(uf,nm,partido,soPartido){
+  if(!soPartido){
+    const tk=semAcento(nm).split(/[\s.]+/).filter(w=>w.length>=4&&!GENERICOS.includes(w));
+    const g=D.gov.find(x=>x[0]===uf&&semAcento(x[1]).split(/[\s.]+/).some(w=>tk.includes(w)));
+    if(g) return g[3];
+  }
+  return campoPartido(partido);
 }
-let estSel="DF";
+let estSel="DF", apCargo="gov";
 function renderApEstados(){
-  const E=AP.estados||{}, com=Object.keys(E).filter(u=>E[u].governador&&E[u].governador.cands.length);
+  const E=AP.estados||{};
   $("ap-est-sec").hidden=!Object.keys(E).length; if(!Object.keys(E).length) return;
-  const cor={L:"var(--lula)",F:"var(--flavio)",N:"var(--neutro)"}, cont={L:0,F:0,N:0}; let eleitos=0;
+  document.querySelectorAll("[data-apcargo]").forEach(b=>{b.setAttribute("aria-pressed",b.dataset.apcargo===apCargo);b.onclick=()=>{apCargo=b.dataset.apcargo;renderApEstados();};});
+  const cor={L:"var(--lula)",F:"var(--flavio)",N:"var(--neutro)",D:"var(--empate)"};
+  const final=AP.final||AP.pst>=100;
+  // Senado: as duas vagas do estado (eleitos; se ainda não houver, os dois primeiros)
+  const vagas=uf=>{const x=E[uf]&&E[uf].senador; if(!x||!x.cands.length) return [];
+    const el=x.cands.filter(c=>c.eleito); return (el.length?el:x.cands).slice(0,2).map(c=>({...c,k:campoDe(uf,c.nm,c.partido,true)}));};
+  const cont={L:0,F:0,N:0}, sen={L:0,F:0,N:0}; let eleitos=0, senEl=0;
+  D.ufs.forEach(u=>{const x=E[u.uf]&&E[u.uf].governador; if(x&&x.cands.length){cont[campoDe(u.uf,x.cands[0].nm,x.cands[0].partido)]++; if(x.cands[0].eleito) eleitos++;}
+    vagas(u.uf).forEach(c=>{sen[c.k]++; if(c.eleito) senEl++;});});
   const g=$("ap-gov-grade"); g.innerHTML="";
-  D.ufs.forEach(u=>{const x=E[u.uf]&&E[u.uf].governador,b=document.createElement("button");let c="var(--vazio)",claro=true,rot="sem dados";
-    if(x&&x.cands.length){const k=campoDe(u.uf,x.cands[0].nm);cont[k]++;if(x.cands[0].eleito)eleitos++;c=cor[k];claro=false;rot=`${x.cands[0].nm} à frente`;}
+  D.ufs.forEach(u=>{const b=document.createElement("button");let c="var(--vazio)",claro=true,rot="sem dados";
+    if(apCargo==="gov"){const x=E[u.uf]&&E[u.uf].governador;
+      if(x&&x.cands.length){const w=x.cands[0],k=campoDe(u.uf,w.nm,w.partido);c=cor[k];claro=false;rot=`${w.nm} ${w.eleito?"eleito(a)":"à frente"}${x.turno===2?" no 2º turno":""}`;}}
+    else{const v=vagas(u.uf);
+      if(v.length){const ks=[...new Set(v.map(x=>x.k))];const k=ks.length===1?ks[0]:"D";c=cor[k];claro=false;rot=v.map(x=>`${x.nm} (${x.partido})`).join(" e ");}}
     b.className="uf"+(u.uf===estSel?" sel":"")+(claro?" claro":"");b.style.gridColumn=POS[u.uf][0]+1;b.style.gridRow=POS[u.uf][1]+1;b.style.background=c;
-    b.textContent=u.uf;b.setAttribute("aria-label",`${u.uf}: ${rot}`);b.onclick=()=>{estSel=u.uf;renderApEstados();};g.appendChild(b);});
-  $("ap-gov-legenda").innerHTML=`<span><b style="background:var(--lula)"></b>Aliado de Lula à frente</span><span><b style="background:var(--flavio)"></b>Aliado de Flávio à frente</span><span><b style="background:var(--neutro)"></b>Fora das alianças</span><span><b style="background:var(--vazio)"></b>Sem dados ainda</span>`;
-  $("ap-gov-placar").innerHTML=`<div><span class="num lula">${cont.L}</span><br><small>Aliados de Lula à frente</small></div><div><span class="num flavio">${cont.F}</span><br><small>Aliados de Flávio à frente</small></div><div><span class="num">${eleitos}</span><br><small>Governadores já eleitos</small></div>`;
+    b.textContent=u.uf;b.setAttribute("aria-label",`${u.uf}: ${rot}`);b.title=rot;b.onclick=()=>{estSel=u.uf;renderApEstados();};g.appendChild(b);});
+  const verbo=final?"eleito":"à frente";
+  $("ap-gov-legenda").innerHTML=apCargo==="gov"
+    ?`<span><b style="background:var(--lula)"></b>Aliado de Lula ${verbo}</span><span><b style="background:var(--flavio)"></b>Aliado de Flávio ${verbo}</span><span><b style="background:var(--neutro)"></b>Fora das alianças</span><span><b style="background:var(--vazio)"></b>Sem dados</span>`
+    :`<span><b style="background:var(--lula)"></b>As duas vagas com PT/PCdoB/PV</span><span><b style="background:var(--flavio)"></b>As duas com o PL</span><span><b style="background:var(--empate)"></b>Vagas divididas</span><span><b style="background:var(--neutro)"></b>Outros partidos</span><span><b style="background:var(--vazio)"></b>Sem dados</span>`;
+  $("ap-gov-placar").innerHTML=apCargo==="gov"
+    ?`<div><span class="num lula">${cont.L}</span><br><small>Governadores aliados de Lula${final?"":" à frente"}</small></div><div><span class="num flavio">${cont.F}</span><br><small>Governadores aliados de Flávio${final?"":" à frente"}</small></div><div><span class="num">${cont.N}</span><br><small>Fora das alianças</small></div>`
+    :`<div><span class="num lula">${sen.L}</span><br><small>Senadores PT/PCdoB/PV</small></div><div><span class="num flavio">${sen.F}</span><br><small>Senadores do PL</small></div><div><span class="num">${sen.N}</span><br><small>Outros partidos</small></div>`;
+  $("ap-est-sub").textContent=apCargo==="gov"
+    ?`Cor pelo alinhamento de quem ${final?"venceu":"lidera"} para governador em cada estado (${eleitos} de 27 já eleitos). Toque em um estado para ver governador e as duas vagas do Senado.`
+    :`Cor pelo partido das ${senEl||54} cadeiras ${senEl?"eleitas":"em disputa"} (duas por estado): federação PT/PCdoB/PV, PL ou outros. Toque em um estado para ver os votos.`;
   const s=E[estSel]||{};
-  const bloco=(x,tit,nota)=>{if(!x||!x.cands.length) return `<h3 style="margin-top:14px">${tit}</h3><p class="sub">Sem dados ainda.</p>`;
+  const bloco=(x,tit,nota,soPartido)=>{if(!x||!x.cands.length) return `<h3 style="margin-top:14px">${tit}</h3><p class="sub">Sem dados ainda.</p>`;
     const mx=Math.max(...x.cands.map(c=>c.pct),1);
-    return `<h3 style="margin-top:14px">${tit} <span class="tag">${pct(x.pst)}% das seções</span></h3>`+x.cands.map((c,i)=>{const k=campoDe(estSel,c.nm);
-      return `<div class="bar-row"><span>${c.nm}${c.eleito?'<span class="eleito">eleito(a)</span>':""}${c.segundo_turno?'<span class="eleito" style="color:var(--empate)">2º turno</span>':""}</span><div class="bar-bg"><i style="width:${c.pct/mx*100}%;background:${tit==="Governador"?cor[k]:"var(--neutro)"}"></i></div><span class="v">${pct(c.pct)}%</span></div>`}).join("")+(nota?`<p class="nota">${nota}</p>`:"");};
-  $("ap-est-detalhe").innerHTML=`<h3>${estSel}</h3>`+bloco(s.governador,"Governador","Vence no 1º turno quem tiver mais da metade dos votos válidos; senão, os dois primeiros vão ao 2º turno em 25/10.")+
-    bloco(s.senador,"Senado","São duas vagas: os dois mais votados são eleitos, sem 2º turno.");
+    return `<h3 style="margin-top:14px">${tit} <span class="tag">${pct(x.pst)}% das seções</span></h3>`+x.cands.map(c=>{const k=campoDe(estSel,c.nm,c.partido,soPartido);
+      return `<div class="bar-row"><span>${c.nm} <span class="sub">${c.partido}</span>${c.eleito?'<span class="eleito">eleito(a)</span>':""}${c.segundo_turno?'<span class="eleito" style="color:var(--empate)">2º turno</span>':""}</span><div class="bar-bg"><i style="width:${c.pct/mx*100}%;background:${cor[k]}"></i></div><span class="v">${pct(c.pct)}%</span></div>`}).join("")+(nota?`<p class="nota">${nota}</p>`:"");};
+  const gv=s.governador, dois=gv&&gv.turno===2;
+  $("ap-est-detalhe").innerHTML=`<h3>${estSel}</h3>`+
+    bloco(gv,dois?"Governador, 2º turno":"Governador",dois?"Decidido no 2º turno, em 25/10.":"Vence no 1º turno quem tiver mais da metade dos votos válidos; senão, os dois primeiros vão ao 2º turno.")+
+    (dois?bloco(s.governador_1t,"Governador, 1º turno",""):"")+
+    bloco(s.senador,"Senado","São duas vagas: os dois mais votados são eleitos, sem 2º turno. Cor pelo partido.",true);
 }
 
 let casa="dep_federal", depUF="DF";

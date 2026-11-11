@@ -677,17 +677,36 @@ def extrair_resultado(offline: bool, codigo: str | None, turno: int | None = Non
                 try:
                     r = _ler_tse(codigo_est, uf.lower(), cargo)
                     if r["cands"]:
-                        res["estados"].setdefault(uf, {})[nome] = {"pst": r["pst"], "cands": r["cands"][:8]}
+                        res["estados"].setdefault(uf, {})[nome] = {"pst": r["pst"], "cands": r["cands"][:8], "turno": turno}
                 except Exception:
                     pass
+        if turno == 2:
+            # O 2º turno só tem governador em algumas UFs. Governadores eleitos no 1º turno e as duas vagas do Senado
+            # vêm da eleição estadual do 1º turno (já com eventuais retotalizações, como a do RJ).
+            cod_1t = COD_ESTADUAL[1]
+            for uf in UFS:
+                for nome, cargo in (("governador", 3), ("senador", 5)):
+                    try:
+                        r = _ler_tse(cod_1t, uf.lower(), cargo)
+                    except Exception:
+                        continue
+                    if not r["cands"]:
+                        continue
+                    x = {"pst": r["pst"], "cands": r["cands"][:8], "turno": 1}
+                    est = res["estados"].setdefault(uf, {})
+                    if nome == "governador" and "governador" in est:
+                        est["governador_1t"] = x
+                    else:
+                        est[nome] = x
             for nome, cargo in cargos_prop:
                 try:
                     r = _ler_tse(codigo_est, uf.lower(), cargo or (8 if uf == "DF" else 7))
                     res["estados"].setdefault(uf, {})[nome] = _resumo_proporcional(r)
                 except Exception:
                     pass
+        n_sen = sum(1 for e in res["estados"].values() if "senador" in e)
         status = (f"{turno}º turno, eleição {codigo}, " + f"{res['pst']:.2f}".replace(".", ",") + f"% das seções, "
-                  f"{len(res['por_uf'])} UFs, cargos estaduais em {len(res['estados'])} UFs")
+                  f"{len(res['por_uf'])} UFs, cargos estaduais em {len(res['estados'])} UFs (Senado em {n_sen})")
         registrar("Apuração oficial (TSE)", True, status)
         return res
     except Exception as erro:
@@ -816,7 +835,7 @@ GOV_2T = [
     ("AM", ("Omar Aziz", "PSD", "L", 40.38), ("Maria do Carmo", "PL", "F", 24.72)),
     ("DF", ("Celina Leão", "PP", "F", 49.93), ("Leandro Grass", "PT", "L", 34.48)),
     ("ES", ("Lorenzo Pazolini", "Republicanos", "N", 49.65), ("Ricardo Ferraço", "MDB", "N", 34.06)),
-    ("RJ", ("Douglas Ruas", "PL", "F", 49.27), ("Eduardo Paes", "PSD", "L", 42.76)),
+    # RJ saiu da lista: o TRE-RJ retotalizou o 1º turno (votos de Garotinho anulados) e Douglas Ruas foi eleito com 50,88%.
     ("RN", ("Allyson Bezerra", "União", "N", 36.83), ("Cadu de Lula", "PT", "L", 36.21)),
     ("TO", ("Professora Dorinha", "União", "N", 45.52), ("Vicentinho Júnior", "PSDB", "N", 43.94)),
 ]
@@ -1089,6 +1108,23 @@ def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticia
     return destino
 
 
+def gravar_apuracao(res: dict) -> None:
+    """Grava apuracao.json (lido pela página publicada), mantendo os deputados da gravação anterior quando faltarem."""
+    destino = AQUI / "apuracao.json"
+    try:
+        anterior = json.loads(destino.read_text(encoding="utf-8")).get("resultado") or {} if destino.exists() else {}
+    except Exception:
+        anterior = {}
+    for uf, ant in (anterior.get("estados") or {}).items():
+        for casa in ("dep_federal", "dep_estadual"):
+            if casa in ant and casa not in res.get("estados", {}).get(uf, {}):
+                res["estados"].setdefault(uf, {})[casa] = ant[casa]
+    if anterior == json.loads(json.dumps(res, ensure_ascii=False)):
+        return   # nada mudou: não gera commit à toa
+    agora = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M")
+    destino.write_text(json.dumps({"atualizado": agora, "resultado": res}, ensure_ascii=False), encoding="utf-8")
+
+
 def apuracao_ao_vivo(args) -> None:
     """Grava apuracao.json na raiz do repositório; a página lê esse arquivo a cada ~1 minuto.
     Deputados são listas grandes: só são relidos com --com-deputados; senão, mantém os da leitura anterior."""
@@ -1138,6 +1174,8 @@ def main() -> None:
     eleitorado = extrair_eleitorado(args.offline)
     bruto = extrair_pesquisas(args.offline)
     resultado = extrair_resultado(args.offline, args.codigo_eleicao, args.turno, args.codigo_estadual)
+    if resultado and resultado.get("pst", 0) >= 100:
+        gravar_apuracao(resultado)
     noticias, criterio = classificar_noticias(extrair_noticias(args.offline))
     pesq, uf, gov, reg, seg, media = agregar(tratar(bruto), eleitorado)
     r1t = resultado_1t(args.offline) if fase_atual() == "2t" else None
