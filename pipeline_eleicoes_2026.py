@@ -33,6 +33,7 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import time
 import os
 import re
 import xml.etree.ElementTree as ET
@@ -596,7 +597,14 @@ def _ler_tse(codigo: str, uf: str, cargo: int) -> dict:
     Candidatos ficam em carg[0].agr[] (agremiação/federação) -> par[] (partido) -> cand[]."""
     cod = int(codigo)
     url = f"{TSE_RESULTADOS}/ele2026/{cod}/dados/{uf}/{uf}-c{cargo:04d}-e{cod:06d}-u.json"
-    j = _get(url, 30).json()
+    for tentativa in range(3):   # o TSE às vezes falha numa leitura isolada; sem isso um estado some do painel
+        try:
+            j = _get(url, 30).json()
+            break
+        except Exception:
+            if tentativa == 2:
+                raise
+            time.sleep(2 * (tentativa + 1))
     carg = (j.get("carg") or [{}])[0]
     cands, agrs = [], []
     for agr in carg.get("agr", []):
@@ -1115,6 +1123,27 @@ def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticia
     return destino
 
 
+def completar_com_anterior(res: dict) -> None:
+    """Com a apuração encerrada, uma leitura que falhou não pode apagar um estado: completa com o apuracao.json anterior."""
+    destino = AQUI / "apuracao.json"
+    try:
+        ant = json.loads(destino.read_text(encoding="utf-8")).get("resultado") or {}
+    except Exception:
+        return
+    if ant.get("turno") != res.get("turno") or ant.get("pst", 0) < 100:
+        return
+    faltas = []
+    for uf, x in (ant.get("por_uf") or {}).items():
+        if uf not in res["por_uf"]:
+            res["por_uf"][uf] = x; faltas.append(f"{uf}/presidente")
+    for uf, e in (ant.get("estados") or {}).items():
+        for cargo, x in e.items():
+            if cargo not in res["estados"].get(uf, {}):
+                res["estados"].setdefault(uf, {})[cargo] = x; faltas.append(f"{uf}/{cargo}")
+    if faltas:
+        print(f"[apuração] leitura do TSE falhou em {', '.join(faltas)}; mantido o dado anterior")
+
+
 def gravar_apuracao(res: dict) -> None:
     """Grava apuracao.json (lido pela página publicada), mantendo os deputados da gravação anterior quando faltarem."""
     destino = AQUI / "apuracao.json"
@@ -1182,6 +1211,7 @@ def main() -> None:
     bruto = extrair_pesquisas(args.offline)
     resultado = extrair_resultado(args.offline, args.codigo_eleicao, args.turno, args.codigo_estadual)
     if resultado and resultado.get("pst", 0) >= 100:
+        completar_com_anterior(resultado)
         gravar_apuracao(resultado)
     noticias, criterio = classificar_noticias(extrair_noticias(args.offline))
     pesq, uf, gov, reg, seg, media = agregar(tratar(bruto), eleitorado)
