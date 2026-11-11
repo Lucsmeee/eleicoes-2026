@@ -239,6 +239,13 @@ NOTAS_GOV = {
 SENADO = {"oposicao": 27, "aliados": 23, "flutuantes": 4, "antes": 34, "depois": 43, "pl": 22, "pt": 9,
           "fonte": "Compilado do Poder360 com as pesquisas estaduais mais recentes (26/9)."}
 
+# Alinhamento de senadores que não sai pelo partido (painel: federação PT/PCdoB/PV = Lula, PL = Flávio, demais = outros).
+# (uf, nome como aparece na urna ou sobrenome, campo L/F/N). Candidatos com "de Lula"/"do Lula" no nome de urna
+# já contam como aliados de Lula e com "Bolsonaro" como aliados de Flávio, sem precisar estar aqui.
+ALINHAMENTO_SENADO = [
+    ("PI", "Júlio César", "L"),   # PSD, "O Julim do Lula", chapa de Rafael Fonteles (PT)
+]
+
 DF_PAINEL = {
     "pres1": {"fonte": "Datafolha 22–24/9", "itens": [["Flávio", 41, "F"], ["Lula", 34, "L"], ["Caiado", 9, "F"],
                                                        ["Cury", 4, "N"], ["Renan Santos", 3, "N"], ["Zema", 1, "F"]]},
@@ -1086,7 +1093,7 @@ def publicar(pesq, uf, gov, reg, seg, media, resultado, atualizado: str, noticia
         "gov": [[r.uf, r.candidato, r.partido, r.campo, _num(r.pct), r.situacao] for r in gov.itertuples()],
         "reg": [[r.regiao, int(r.votos_estimados), int(r.votos_lula), int(r.votos_flavio), int(r.votos_sem_pesquisa)]
                 for r in reg.itertuples()],
-        "noticias": noticias or [], "criterio_noticias": criterio, "notas_gov": NOTAS_GOV, "senado": SENADO, "df": DF_PAINEL, "resultado": resultado,
+        "noticias": noticias or [], "criterio_noticias": criterio, "notas_gov": NOTAS_GOV, "senado": SENADO, "sen_campo": ALINHAMENTO_SENADO, "df": DF_PAINEL, "resultado": resultado,
         "fontes": FONTES + [{"nome": "Pesquisas estaduais, 2º turno, governadores, Senado e DF", "ok": False,
                              "status": f"snapshot manual de {DATA_SNAPSHOT}"}],
         "rodape": RODAPE,
